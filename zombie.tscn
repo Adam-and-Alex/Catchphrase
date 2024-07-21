@@ -45,9 +45,8 @@ animations = [{
 radius = 7.0
 height = 32.0
 
-[node name="Zombie" type="RigidBody2D"]
-collision_mask = 0
-gravity_scale = 0.0
+[node name="Zombie" type="CharacterBody2D"]
+motion_mode = 1
 script = ExtResource("1_7sr07")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]

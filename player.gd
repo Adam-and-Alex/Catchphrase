@@ -1,4 +1,4 @@
-extends Area2D
+extends CharacterBody2D
 var speed = 400
 
 # Each frame, the player entity advertizes its location
@@ -8,6 +8,10 @@ signal player_detected(player_position)
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$AnimatedSprite2D.play("down_walk")	
+
+# Handles collisions
+func _physics_process(delta):
+	move_and_collide(velocity * delta)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -32,6 +36,9 @@ func _process(delta):
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
 		position += velocity * delta
+	
+	# Dash, TBD	
+	#if Input.is_action_pressed()
 
 	# I say where my position is every frame, move or not		
-	player_detected.emit(position)
+	player_detected.emit(position, delta)
