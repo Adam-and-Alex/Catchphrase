@@ -1,14 +1,20 @@
 extends CharacterBody2D
 
-var speed = randi_range(150, 250)
+#Zombie state
+var chase_speed = randi_range(150, 250)
 var starting_position: Vector2 = Vector2.ZERO
-var zombie_velocity = Vector2.ZERO
 
+# Make Zombie movement more interesting, part 1
 # Every CONFUSION_PERIOD we add an error to the direction of movement
-var CONFUSION_PERIOD = 5.0 #(seconds)
-var last_confusion_time = CONFUSION_PERIOD
 var MAX_CONFUSION_ANGLE = PI/2.0 #(radians)
+var SCATTER_SPEED = 1000
 var confusion_angle = 0.0
+
+# Make Zombie movement more interesting part 2
+var is_scattering = false
+var scatter_angle = 0.0
+var scatter_speed = 0.0
+var MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -20,7 +26,18 @@ func _process(delta):
 
 # Handles collisions
 func _physics_process(delta):
-	move_and_collide(velocity * delta)
+	#(move and collide results in zombies bumping each other into immobility!)
+	var did_collide = move_and_slide()
+	# Pass on scattering
+	var damping_coefficient = (0.8*scatter_speed)/SCATTER_SPEED #(each scatter collision passes on less force)
+	if did_collide and is_scattering and damping_coefficient > 0.25:
+		for i in get_slide_collision_count():
+			var collision_info = get_slide_collision(i)
+			var collider = collision_info.get_collider()
+			if collider.has_method("_on_collide_with_dashing_player"):
+				collider._on_collide_with_dashing_player(
+					collision_info.get_collider_velocity(), damping_coefficient
+				)
 
 func _on_player_player_detected(player_position: Vector2, delta):
 	if (player_position.y < position.y):
@@ -31,15 +48,29 @@ func _on_player_player_detected(player_position: Vector2, delta):
 		$AnimatedSprite2D.play("left")
 	else:
 		$AnimatedSprite2D.play("front")
-	
-	last_confusion_time += delta
-	if last_confusion_time > CONFUSION_PERIOD:
-		last_confusion_time = 0.0
-		confusion_angle = randf_range(-MAX_CONFUSION_ANGLE, MAX_CONFUSION_ANGLE)
-	
-	zombie_velocity = player_position - position
-	if zombie_velocity.length() > 0:
-		var angle_to_player = zombie_velocity.angle()
-		zombie_velocity = Vector2.from_angle(angle_to_player + confusion_angle)
-		zombie_velocity = zombie_velocity.normalized() * speed
-		position += zombie_velocity * delta
+		
+	if is_scattering:
+		# Scatter movement
+		velocity = Vector2.from_angle(scatter_angle) * scatter_speed 
+	else:
+		# Normal movement
+		var chase_velocity = player_position - position
+		if chase_velocity.length() > 0:
+			var angle_to_player = chase_velocity.angle()
+			chase_velocity = Vector2.from_angle(angle_to_player + confusion_angle)
+			velocity = chase_velocity.normalized() * chase_speed
+		else:
+			velocity = Vector2.ZERO
+
+# Every few seconds, Zombie wakes up and takes another bead on the player
+func _on_confusion_timer_timeout():
+	confusion_angle = randf_range(-MAX_CONFUSION_ANGLE, MAX_CONFUSION_ANGLE)
+
+func _on_collide_with_dashing_player(velo: Vector2, damping: float):
+	is_scattering = true
+	scatter_speed = SCATTER_SPEED*damping
+	scatter_angle = velo.angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
+	$ScatterTimer.start()
+
+func _on_scatter_timer_timeout():
+	is_scattering = false

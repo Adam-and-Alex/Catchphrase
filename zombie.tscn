@@ -60,3 +60,14 @@ show_behind_parent = true
 position = Vector2(0, 28)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_bc6ls")
+
+[node name="ConfusionTimer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[node name="ScatterTimer" type="Timer" parent="."]
+wait_time = 0.15
+one_shot = true
+
+[connection signal="timeout" from="ConfusionTimer" to="." method="_on_confusion_timer_timeout"]
+[connection signal="timeout" from="ScatterTimer" to="." method="_on_scatter_timer_timeout"]
