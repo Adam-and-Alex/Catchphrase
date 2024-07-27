@@ -34,8 +34,8 @@ func _physics_process(delta):
 		for i in get_slide_collision_count():
 			var collision_info = get_slide_collision(i)
 			var collider = collision_info.get_collider()
-			if collider.has_method("_on_collide_with_dashing_player"):
-				collider._on_collide_with_dashing_player(
+			if collider.has_method("_on_collide_with_scattered_zombie"):
+				collider._on_collide_with_scattered_zombie(
 					collision_info.get_collider_velocity(), damping_coefficient
 				)
 
@@ -62,15 +62,25 @@ func _on_player_player_detected(player_position: Vector2, delta):
 		else:
 			velocity = Vector2.ZERO
 
-# Every few seconds, Zombie wakes up and takes another bead on the player
+# Every few seconds, Zombie wakes up and takes another - inaccurate! - bead on the player
 func _on_confusion_timer_timeout():
 	confusion_angle = randf_range(-MAX_CONFUSION_ANGLE, MAX_CONFUSION_ANGLE)
 
-func _on_collide_with_dashing_player(velo: Vector2, damping: float):
+func _on_collide_with_scattered_zombie(velo: Vector2, damping: float):
+	_on_collide_with_other_character(velo, damping)
+
+func _on_collide_with_dashing_player(velo: Vector2):
+	_on_collide_with_other_character(velo, 1.0)
+
+func _on_collide_with_other_character(velo: Vector2, damping: float):
 	is_scattering = true
 	scatter_speed = SCATTER_SPEED*damping
 	scatter_angle = velo.angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
 	$ScatterTimer.start()
+
+func _on_collide_with_bullet():
+	# TODO: for now just eliminate
+	queue_free()
 
 func _on_scatter_timer_timeout():
 	is_scattering = false

@@ -7,6 +7,9 @@ var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
 
+# Weapon
+var Bullet = preload("res://bullet.tscn")
+
 # Dashing state logic
 func _on_dash_duration_timeout():
 	speed = NORMAL_SPEED
@@ -30,7 +33,7 @@ func _physics_process(delta):
 	if collision_info and is_dashing:
 		var collider = collision_info.get_collider()
 		if collider.has_method("_on_collide_with_dashing_player"):
-			collider._on_collide_with_dashing_player(collision_info.get_collider_velocity(), 1.0)
+			collider._on_collide_with_dashing_player(collision_info.get_collider_velocity())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -68,3 +71,14 @@ func _process(delta):
 	# (since Zombie movement depends on this)
 	player_detected.emit(position, delta)
 
+	if Input.is_action_pressed("fire"):
+		# TODO: make the angle here be determined by a twin stick if set, else goes in dir of travel
+		# TODO: position is wrong (fake "height" + needs to be outside of player sprite so doesn't immediately collide)
+		# TODO: manage rate of fire
+		var b = Bullet.instantiate()
+		if velocity.length() > 0:
+			b.start(position, velocity.angle())
+		else: 
+			b.start(position, 0.0)
+			
+		get_tree().root.add_child(b)
