@@ -41,6 +41,7 @@ func _process(delta):
 	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	velocity.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
 	# Pick sprite based on dir of movement
+	# (if velocity.length == 0 then choose sprite based on shooting direction)
 	if velocity.y < 0:
 		$AnimatedSprite2D.play("up_walk")
 	if velocity.y > 0:
@@ -68,6 +69,15 @@ func _process(delta):
 		var shoot_direction = Vector2.ZERO
 		shoot_direction.x = Input.get_action_strength("fire_right") - Input.get_action_strength("fire_left")
 		shoot_direction.y = Input.get_action_strength("fire_down") - Input.get_action_strength("fire_up")
+		# If not moving then change sprite based on direction of fire
+		if shoot_direction.y > 0 and velocity.length() == 0:
+			if shoot_direction.x > 0:
+				$AnimatedSprite2D.play("right_walk")
+			elif shoot_direction.x < 0:
+				$AnimatedSprite2D.play("left_walk")
+			else:
+				$AnimatedSprite2D.play("down_walk")
+			
 		
 		if shoot_direction.length() > 0:
 			fire_bullet(shoot_direction)
