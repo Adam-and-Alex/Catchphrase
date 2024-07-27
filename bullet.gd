@@ -7,6 +7,7 @@ func start(_position, _direction):
 	position = _position
 	velocity = Vector2(BULLET_SPEED, 0).rotated(rotation)
 
+
 func _physics_process(delta):
 	# TODO: this doesn't really work because the bullet to be a mid "height" not "foot height"
 	var collision_info = move_and_collide(velocity*delta)

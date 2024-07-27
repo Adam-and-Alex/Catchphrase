@@ -2,6 +2,8 @@ extends Node2D
 
 @export var player_scene: PackedScene
 
+var NUM_ZOMBIES = 20
+
 func build_random_entity_position():
 	var rng = RandomNumberGenerator.new()
 	var screenSize = get_viewport().get_visible_rect().size
@@ -13,7 +15,7 @@ func build_random_entity_position():
 func _ready():
 	$Player.position = build_random_entity_position()
 	var zombie_scene = preload("res://zombie.tscn")
-	for i in range(20):
+	for i in range(NUM_ZOMBIES):
 		var zombie_instance = zombie_scene.instantiate()
 		$Player.player_detected.connect(zombie_instance._on_player_player_detected)
 		zombie_instance.position = build_random_entity_position()

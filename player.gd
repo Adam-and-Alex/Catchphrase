@@ -38,22 +38,17 @@ func _physics_process(delta):
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	velocity = Vector2.ZERO #Player Movement Vector
-	if Input.is_action_pressed("move_up"):
-		velocity.y -= 5
+	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	velocity.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
+	# Pick sprite based on dir of movement
+	if velocity.y < 0:
 		$AnimatedSprite2D.play("up_walk")
-	if Input.is_action_pressed("move_down"):
-		velocity.y += 5
+	if velocity.y > 0:
 		$AnimatedSprite2D.play("down_walk")
-	if Input.is_action_pressed("move_right"):
-		velocity.x += 5
-		$AnimatedSprite2D.play("right_walk")
-	if Input.is_action_pressed("move_left"):
-		velocity.x -= 5
-		$AnimatedSprite2D.play("left_walk")
-	if Input.is_action_pressed("move_up") && Input.is_action_pressed("move_left"):
-		$AnimatedSprite2D.play("up_walk")
-	if Input.is_action_pressed("move_up") && Input.is_action_pressed("move_right"):
-		$AnimatedSprite2D.play("up_walk")
+		if velocity.x > 0:
+			$AnimatedSprite2D.play("right_walk")
+		if velocity.x < 0:
+			$AnimatedSprite2D.play("left_walk")
 		
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
@@ -67,18 +62,31 @@ func _process(delta):
 				$DashCooldown.start()
 				$DashDuration.start()
 	
+	# Shooting logic:
+	# (Can't shoot and dash at the same time)
+	if not is_dashing:
+		var shoot_direction = Vector2.ZERO
+		shoot_direction.x = Input.get_action_strength("fire_right") - Input.get_action_strength("fire_left")
+		shoot_direction.y = Input.get_action_strength("fire_down") - Input.get_action_strength("fire_up")
+		
+		if shoot_direction.length() > 0:
+			fire_bullet(shoot_direction)
+		elif Input.is_action_pressed("fire_kb_test"):
+			fire_bullet(velocity)
+			
 	# I say where my position is every frame, move or not
 	# (since Zombie movement depends on this)
 	player_detected.emit(position, delta)
 
-	if Input.is_action_pressed("fire"):
-		# TODO: make the angle here be determined by a twin stick if set, else goes in dir of travel
-		# TODO: position is wrong (fake "height" + needs to be outside of player sprite so doesn't immediately collide)
-		# TODO: manage rate of fire
-		var b = Bullet.instantiate()
-		if velocity.length() > 0:
-			b.start(position, velocity.angle())
-		else: 
-			b.start(position, 0.0)
-			
-		get_tree().root.add_child(b)
+
+# TODO: position is wrong (fake "height" + needs to be outside of player sprite so doesn't immediately collide)
+# TODO: manage rate of fire
+func fire_bullet(dir):
+	var b = Bullet.instantiate()
+	if dir.length() > 0:
+		b.start(position, dir.angle())
+	else: 
+		b.start(position, 0.0)
+		
+	get_tree().root.add_child(b)
+	
