@@ -4,10 +4,10 @@ extends CharacterBody2D
 const Zombie = preload("res://zombie.gd")
 
 var BULLET_SPEED = 1400
-var BULLET_KNOCKBACK = 100
+var BULLET_KNOCKBACK = 150
 
 #TODO: all sorts of fun params here and in player
-# fire rate, max in flight, bounce %, knockback, (set on fire), makes scatter
+# fire rate, max in flight, bounce %, split chars, knockback, (set on fire), makes scatter
 
 func start(_position: Vector2, _direction: float):
 	rotation = _direction

@@ -7,12 +7,17 @@ const Zombie = preload("res://zombie.gd")
 # Player state:
 var NORMAL_SPEED = 400
 var DASH_SPEED = 1200
-const MUZZLE_OFFSET = 32
 var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
 
-#TODO: lots of fun buffs: dash effects, speed armor, touch effects
+# Weapon state
+var MUZZLE_OFFSET = 32
+var weapon_cooldown_time = 0.2 #(secs)
+var current_weapon_cooldown = 0
+
+#TODO: lots of fun buffs: dash effects, speed, armor, touch effects, 
+#various healing (lifesteal, regen, medkits)
 
 # Dashing state logic
 func _on_dash_duration_timeout():
@@ -61,14 +66,18 @@ func _process(delta):
 	# Shooting logic:
 	# (Can't shoot and dash at the same time)
 	var shoot_direction = Vector2.ZERO
+	if current_weapon_cooldown > 0:
+		current_weapon_cooldown -= delta
+		
 	if not is_dashing:
 		shoot_direction.x = Input.get_action_strength("fire_right") - Input.get_action_strength("fire_left")
 		shoot_direction.y = Input.get_action_strength("fire_down") - Input.get_action_strength("fire_up")
 		
-		if shoot_direction.length() > 0:
-			fire_bullet(shoot_direction)
-		elif Input.is_action_pressed("fire_kb_test"):
-			fire_bullet(velocity)
+		if current_weapon_cooldown <= 0:
+			if shoot_direction.length() > 0:
+				fire_bullet(shoot_direction)
+			elif Input.is_action_pressed("fire_kb_test"):
+				fire_bullet(velocity)			
 		
 	# What sprite to use?	
 	# Pick sprite based on dir of movement
@@ -99,7 +108,12 @@ func _process(delta):
 
 # TODO: manage rate of fire
 func fire_bullet(dir: Vector2):
+	current_weapon_cooldown = weapon_cooldown_time
+	
 	var b = Bullet.instantiate()
+	#TODO: need to fire with the collision (center + (0,32)) at your feet
+	# with a reduced MUZZLE_OFFSET*dir and then use layers so the bullet's visibility
+	# is sensible 
 	var bullet_position = position + MUZZLE_OFFSET*dir
 	if dir.length() > 0:
 		b.start(bullet_position, dir.angle())

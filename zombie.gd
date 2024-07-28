@@ -20,7 +20,7 @@ var scatter_speed = 0.0
 var MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
 # Knockback
-@export var knockback_resistance: float = 1
+@export var knockback_resistance: float = 10
 var knockback = Vector2.ZERO
 
 # Called when the node enters the scene tree for the first time.
@@ -35,7 +35,8 @@ func _process(delta):
 func _physics_process(delta):
 	# Knockback			
 	knockback = knockback.move_toward(Vector2.ZERO, knockback_resistance)
-	velocity += knockback * delta
+	velocity += knockback
+	
 	
 	#(move and collide results in zombies bumping each other into immobility!)
 	var did_collide = move_and_slide()
@@ -95,13 +96,10 @@ func _on_collide_with_other_character(velo: Vector2, damping: float):
 
 # Shot with a bullet!
 func _on_collide_with_bullet(bullet_velocity: Vector2, knockback_strength: float):
-	# TODO: for now just eliminate
+	# Very basic knockback
+	knockback = knockback + bullet_velocity.normalized()*knockback_strength
+	# TODO: reduce health, also tint red, if dies
 	#queue_free()
-	# TODO: maybe implement knockback (also for dashing?) see eg https://forum.godotengine.org/t/knockback-for-player-and-enemies/37114/2
-	# (or search again) .. not sure if this is doing anything
-	knockback = bullet_velocity.normalized()*knockback_strength
-	#(comment this in if doing nothing!)
-	#pass
 
 # Effect of being scatters finishes
 func _on_scatter_timer_timeout():
