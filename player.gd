@@ -1,14 +1,18 @@
 extends CharacterBody2D
 
+# Imports:
+var Bullet = preload("res://bullet.tscn")
+const Zombie = preload("res://zombie.gd")
+
 # Player state:
 var NORMAL_SPEED = 400
 var DASH_SPEED = 1200
+const MUZZLE_OFFSET = 32
 var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
 
-# Weapon
-var Bullet = preload("res://bullet.tscn")
+#TODO: lots of fun buffs: dash effects, speed armor, touch effects
 
 # Dashing state logic
 func _on_dash_duration_timeout():
@@ -32,24 +36,15 @@ func _physics_process(delta):
 	var collision_info = move_and_collide(velocity * delta)
 	if collision_info and is_dashing:
 		var collider = collision_info.get_collider()
-		if collider.has_method("_on_collide_with_dashing_player"):
-			collider._on_collide_with_dashing_player(collision_info.get_collider_velocity())
+		if collider is Zombie:
+			var colliding_zombie = collider as Zombie
+			colliding_zombie._on_collide_with_dashing_player(collision_info.get_collider_velocity())
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	velocity = Vector2.ZERO #Player Movement Vector
 	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	velocity.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
-	# Pick sprite based on dir of movement
-	# (if velocity.length == 0 then choose sprite based on shooting direction)
-	if velocity.y < 0:
-		$AnimatedSprite2D.play("up_walk")
-	if velocity.y > 0:
-		$AnimatedSprite2D.play("down_walk")
-		if velocity.x > 0:
-			$AnimatedSprite2D.play("right_walk")
-		if velocity.x < 0:
-			$AnimatedSprite2D.play("left_walk")
 		
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
@@ -65,38 +60,51 @@ func _process(delta):
 	
 	# Shooting logic:
 	# (Can't shoot and dash at the same time)
+	var shoot_direction = Vector2.ZERO
 	if not is_dashing:
-		var shoot_direction = Vector2.ZERO
 		shoot_direction.x = Input.get_action_strength("fire_right") - Input.get_action_strength("fire_left")
 		shoot_direction.y = Input.get_action_strength("fire_down") - Input.get_action_strength("fire_up")
-		# If not moving then change sprite based on direction of fire
-		if shoot_direction.y > 0 and velocity.length() == 0:
-			if shoot_direction.x > 0:
-				$AnimatedSprite2D.play("right_walk")
-			elif shoot_direction.x < 0:
-				$AnimatedSprite2D.play("left_walk")
-			else:
-				$AnimatedSprite2D.play("down_walk")
-			
 		
 		if shoot_direction.length() > 0:
 			fire_bullet(shoot_direction)
 		elif Input.is_action_pressed("fire_kb_test"):
 			fire_bullet(velocity)
+		
+	# What sprite to use?	
+	# Pick sprite based on dir of movement
+	# (if velocity.length == 0 then choose sprite based on shooting direction)
+	if velocity.y < 0:
+		$AnimatedSprite2D.play("up_walk")
+	elif velocity.y > 0 or velocity.x != 0:
+		$AnimatedSprite2D.play("down_walk")
+		if velocity.x > 0:
+			$AnimatedSprite2D.play("right_walk")
+		if velocity.x < 0:
+			$AnimatedSprite2D.play("left_walk")
+	#(otherwise just leave the sprite as is, unless shooting)
+	
+	# If not moving then change sprite based on direction of fire
+	if shoot_direction.y >= 0 and velocity.length() == 0:
+		if shoot_direction.x > 0:
+			$AnimatedSprite2D.play("right_walk")
+		elif shoot_direction.x < 0:
+			$AnimatedSprite2D.play("left_walk")
+		else:
+			$AnimatedSprite2D.play("down_walk")
 			
 	# I say where my position is every frame, move or not
 	# (since Zombie movement depends on this)
 	player_detected.emit(position, delta)
 
 
-# TODO: position is wrong (fake "height" + needs to be outside of player sprite so doesn't immediately collide)
 # TODO: manage rate of fire
-func fire_bullet(dir):
+func fire_bullet(dir: Vector2):
 	var b = Bullet.instantiate()
+	var bullet_position = position + MUZZLE_OFFSET*dir
 	if dir.length() > 0:
-		b.start(position, dir.angle())
+		b.start(bullet_position, dir.angle())
 	else: 
-		b.start(position, 0.0)
+		b.start(bullet_position, 0.0)
 		
 	get_tree().root.add_child(b)
 	

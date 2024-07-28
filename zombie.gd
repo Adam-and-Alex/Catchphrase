@@ -1,6 +1,9 @@
 extends CharacterBody2D
 
-#Zombie state
+# Imports:
+const Zombie = preload("res://zombie.gd")
+
+# Zombie state
 var chase_speed = randi_range(150, 250)
 var starting_position: Vector2 = Vector2.ZERO
 
@@ -16,6 +19,10 @@ var scatter_angle = 0.0
 var scatter_speed = 0.0
 var MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
+# Knockback
+@export var knockback_resistance: float = 1
+var knockback = Vector2.ZERO
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$AnimatedSprite2D.play("front")
@@ -26,6 +33,10 @@ func _process(delta):
 
 # Handles collisions
 func _physics_process(delta):
+	# Knockback			
+	knockback = knockback.move_toward(Vector2.ZERO, knockback_resistance)
+	velocity += knockback * delta
+	
 	#(move and collide results in zombies bumping each other into immobility!)
 	var did_collide = move_and_slide()
 	# Pass on scattering
@@ -34,11 +45,12 @@ func _physics_process(delta):
 		for i in get_slide_collision_count():
 			var collision_info = get_slide_collision(i)
 			var collider = collision_info.get_collider()
-			if collider.has_method("_on_collide_with_scattered_zombie"):
-				collider._on_collide_with_scattered_zombie(
+			if collider is Zombie:
+				var colliding_zombie = collider as Zombie
+				colliding_zombie._on_collide_with_scattered_zombie(
 					collision_info.get_collider_velocity(), damping_coefficient
-				)
-
+				)				
+		
 func _on_player_player_detected(player_position: Vector2, delta):
 	if (player_position.y < position.y):
 		$AnimatedSprite2D.play("back")
@@ -66,21 +78,31 @@ func _on_player_player_detected(player_position: Vector2, delta):
 func _on_confusion_timer_timeout():
 	confusion_angle = randf_range(-MAX_CONFUSION_ANGLE, MAX_CONFUSION_ANGLE)
 
+# If a scatter zombie collides with me, I scatter slightly less frantically!
 func _on_collide_with_scattered_zombie(velo: Vector2, damping: float):
 	_on_collide_with_other_character(velo, damping)
 
+# If a player dashes into me, I scatter!
 func _on_collide_with_dashing_player(velo: Vector2):
 	_on_collide_with_other_character(velo, 1.0)
 
+# Common code for scattering
 func _on_collide_with_other_character(velo: Vector2, damping: float):
 	is_scattering = true
 	scatter_speed = SCATTER_SPEED*damping
 	scatter_angle = velo.angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
 	$ScatterTimer.start()
 
-func _on_collide_with_bullet():
+# Shot with a bullet!
+func _on_collide_with_bullet(bullet_velocity: Vector2, knockback_strength: float):
 	# TODO: for now just eliminate
-	queue_free()
+	#queue_free()
+	# TODO: maybe implement knockback (also for dashing?) see eg https://forum.godotengine.org/t/knockback-for-player-and-enemies/37114/2
+	# (or search again) .. not sure if this is doing anything
+	knockback = bullet_velocity.normalized()*knockback_strength
+	#(comment this in if doing nothing!)
+	#pass
 
+# Effect of being scatters finishes
 func _on_scatter_timer_timeout():
 	is_scattering = false

@@ -1,23 +1,31 @@
 extends CharacterBody2D
 
-var BULLET_SPEED = 1400
+# Imports:
+const Zombie = preload("res://zombie.gd")
 
-func start(_position, _direction):
+var BULLET_SPEED = 1400
+var BULLET_KNOCKBACK = 100
+
+#TODO: all sorts of fun params here and in player
+# fire rate, max in flight, bounce %, knockback, (set on fire), makes scatter
+
+func start(_position: Vector2, _direction: float):
 	rotation = _direction
 	position = _position
 	velocity = Vector2(BULLET_SPEED, 0).rotated(rotation)
+	self.rotate(_direction)
 
 
 func _physics_process(delta):
-	# TODO: this doesn't really work because the bullet to be a mid "height" not "foot height"
 	var collision_info = move_and_collide(velocity*delta)
 	if collision_info:
-		queue_free() #TODO: handle bullet player collisions (once position is correct shouldn't be an issue?)
 		var collider = collision_info.get_collider()
-		if collider.has_method("_on_collide_with_bullet"):
-			collider._on_collide_with_bullet()
+		if collider is Zombie:
+			var colliding_zombie = collider as Zombie
+			colliding_zombie._on_collide_with_bullet(velocity, BULLET_KNOCKBACK)
+		queue_free() 
 		
 
-func _on_VisibilityNotifier2D_screen_exited():
-	print("NOT SURE HOW TO WIRE THIS UP")
+# TODO: really should be when it reaches the end of the player area not screen?
+func _on_visible_on_screen_notifier_2d_screen_exited():
 	queue_free()
