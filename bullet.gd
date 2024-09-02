@@ -6,6 +6,8 @@ const Zombie = preload("res://zombie.gd")
 var BULLET_SPEED = 1400
 var BULLET_KNOCKBACK = 150
 
+var default_bullet_damage = 10
+
 #TODO: all sorts of fun params here and in player
 # fire rate, max in flight, bounce %, split chars, knockback, (set on fire), makes scatter
 
@@ -22,7 +24,8 @@ func _physics_process(delta):
 		var collider = collision_info.get_collider()
 		if collider is Zombie:
 			var colliding_zombie = collider as Zombie
-			colliding_zombie._on_collide_with_bullet(velocity, BULLET_KNOCKBACK)
+			colliding_zombie._on_collide_with_bullet(velocity, BULLET_KNOCKBACK, default_bullet_damage)
+			
 		queue_free() 
 		
 

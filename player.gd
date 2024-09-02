@@ -16,6 +16,9 @@ var MUZZLE_OFFSET = 32
 var weapon_cooldown_time = 0.2 #(secs)
 var current_weapon_cooldown = 0
 
+var player_hp = 100
+
+var player_damage_visibility = 0
 #TODO: lots of fun buffs: dash effects, speed, armor, touch effects, 
 #various healing (lifesteal, regen, medkits)
 
@@ -39,11 +42,12 @@ func _physics_process(delta):
 	#(prefer move and collide to move and slide because player should have control over 
 	# their movement)
 	var collision_info = move_and_collide(velocity * delta)
-	if collision_info and is_dashing:
+	if collision_info:
 		var collider = collision_info.get_collider()
-		if collider is Zombie:
-			var colliding_zombie = collider as Zombie
-			colliding_zombie._on_collide_with_dashing_player(collision_info.get_collider_velocity())
+		if is_dashing:
+			if collider is Zombie:
+				var colliding_zombie = collider as Zombie
+				colliding_zombie._on_collide_with_dashing_player(collision_info.get_collider_velocity())	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -104,8 +108,13 @@ func _process(delta):
 	# I say where my position is every frame, move or not
 	# (since Zombie movement depends on this)
 	player_detected.emit(position, delta)
-
-
+	
+	if player_hp <= 0:
+		queue_free()
+	
+	if player_damage_visibility > 0:
+		player_damage_visibility = maxf(player_damage_visibility - 0.01, 0)
+		modulate = Color(1, 1 - player_damage_visibility, 1 - player_damage_visibility)
 # TODO: manage rate of fire
 func fire_bullet(dir: Vector2):
 	current_weapon_cooldown = weapon_cooldown_time
@@ -122,3 +131,8 @@ func fire_bullet(dir: Vector2):
 		
 	get_tree().root.add_child(b)
 	
+
+func _on_collide_with_zombie(zombie_damage):
+	if player_damage_visibility == 0 && is_dashing == false:
+		player_damage_visibility = 1.0
+		player_hp = player_hp - zombie_damage
