@@ -1,16 +1,37 @@
-[gd_scene load_steps=8 format=3 uid="uid://bv4ul2t5kftk0"]
+[gd_scene load_steps=20 format=3 uid="uid://bv4ul2t5kftk0"]
 
 [ext_resource type="Script" path="res://zombie.gd" id="1_7sr07"]
 [ext_resource type="Texture2D" uid="uid://bgrvs61cvmh4l" path="res://assets/Zombie_Back.png" id="1_s1y8y"]
 [ext_resource type="Texture2D" uid="uid://b2qfoqruai2xn" path="res://assets/Zombie_Down.png" id="2_dnwn6"]
+[ext_resource type="Texture2D" uid="uid://dfuv4ilxdqacu" path="res://assets/Zombie_Back2.png" id="3_43d1g"]
 [ext_resource type="Texture2D" uid="uid://slxyp5fiiyk6" path="res://assets/Zombie_Left.png" id="3_eobax"]
 [ext_resource type="Texture2D" uid="uid://b8e2s1kb13r8q" path="res://assets/Zombie_Right.png" id="4_aqg7b"]
+[ext_resource type="Texture2D" uid="uid://j8xhr56f00tr" path="res://assets/Zombie_Back3.png" id="4_fc2an"]
+[ext_resource type="Texture2D" uid="uid://bltwqj161gsim" path="res://assets/Zombie_Back4.png" id="5_lgeks"]
+[ext_resource type="Texture2D" uid="uid://oacm5jllhhmh" path="res://assets/Zombie_Down2.png" id="7_hjft1"]
+[ext_resource type="Texture2D" uid="uid://bp3r0ewynjsom" path="res://assets/Zombie_Down3.png" id="8_gfvrw"]
+[ext_resource type="Texture2D" uid="uid://bopph7yxgrml6" path="res://assets/Zombie_Down4.png" id="9_txrcx"]
+[ext_resource type="Texture2D" uid="uid://bgulji2kvjmks" path="res://assets/Zombie_Left2.png" id="11_481rx"]
+[ext_resource type="Texture2D" uid="uid://dssir86aokaxi" path="res://assets/Zombie_Left3.png" id="12_u8umg"]
+[ext_resource type="Texture2D" uid="uid://b8dem66v2lwhc" path="res://assets/Zombie_Left4.png" id="13_qp115"]
+[ext_resource type="Texture2D" uid="uid://bakll0mmd53xx" path="res://assets/Zombie_Right2.png" id="15_v1jjv"]
+[ext_resource type="Texture2D" uid="uid://bsckp5wdiujm7" path="res://assets/Zombie_Right3.png" id="16_4dncu"]
+[ext_resource type="Texture2D" uid="uid://c0b4ag1u00lhn" path="res://assets/Zombie_Right4.png" id="17_jtdwo"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_y0nam"]
 animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("1_s1y8y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_43d1g")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_fc2an")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_lgeks")
 }],
 "loop": true,
 "name": &"back",
@@ -19,6 +40,15 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("2_dnwn6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_hjft1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_gfvrw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_txrcx")
 }],
 "loop": true,
 "name": &"front",
@@ -27,6 +57,15 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("3_eobax")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_481rx")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_u8umg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_qp115")
 }],
 "loop": true,
 "name": &"left",
@@ -35,6 +74,15 @@ animations = [{
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("4_aqg7b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_v1jjv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_4dncu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("17_jtdwo")
 }],
 "loop": true,
 "name": &"right",
@@ -53,7 +101,7 @@ script = ExtResource("1_7sr07")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_y0nam")
-animation = &"front"
+animation = &"back"
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
 

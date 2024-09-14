@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3 uid="uid://dhnmbb3geaiey"]
+
+[ext_resource type="Script" path="res://tombstone.gd" id="1_2d53x"]
+[ext_resource type="Texture2D" uid="uid://cq6b1i8qqsyk8" path="res://assets/Tombstone_dead.png" id="2_41lv8"]
+[ext_resource type="Texture2D" uid="uid://cxpiwrgbh5xrg" path="res://assets/Tombstone.png" id="2_aq3op"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_b3xbm"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_41lv8")
+}],
+"loop": true,
+"name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_aq3op")
+}],
+"loop": true,
+"name": &"resurrecting",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_83hbh"]
+radius = 7.0
+height = 32.0
+
+[node name="Tombstone" type="CharacterBody2D"]
+position = Vector2(8, 8)
+collision_layer = 2
+collision_mask = 15
+script = ExtResource("1_2d53x")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-8, -8)
+sprite_frames = SubResource("SpriteFrames_b3xbm")
+animation = &"dead"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+show_behind_parent = true
+position = Vector2(-8, 24)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_83hbh")
+
+[node name="ResurrectionTimer" type="Timer" parent="."]
+wait_time = 2.5
+one_shot = true
+
+[connection signal="timeout" from="ResurrectionTimer" to="." method="_on_resurrection_timer_timeout"]

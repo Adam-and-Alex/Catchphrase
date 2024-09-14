@@ -19,6 +19,12 @@ offset_top = 19.0
 offset_right = 125.0
 offset_bottom = 72.0
 
+[node name="CanPlayerDash" type="RichTextLabel" parent="."]
+offset_left = 16.0
+offset_top = 578.0
+offset_right = 107.0
+offset_bottom = 618.0
+
 [node name="TimeElapsed" type="RichTextLabel" parent="."]
 offset_left = 838.0
 offset_top = 26.0

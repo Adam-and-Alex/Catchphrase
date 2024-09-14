@@ -10,6 +10,7 @@ var DASH_SPEED = 1200
 var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
+var is_dead = false
 
 # Weapon state
 var MUZZLE_OFFSET = 32
@@ -39,6 +40,9 @@ func _ready():
 
 # Handles collisions
 func _physics_process(delta):
+	if is_dead:
+		return
+	
 	#(prefer move and collide to move and slide because player should have control over 
 	# their movement)
 	var collision_info = move_and_collide(velocity * delta)
@@ -51,6 +55,9 @@ func _physics_process(delta):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if is_dead:
+		return
+	
 	velocity = Vector2.ZERO #Player Movement Vector
 	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	velocity.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
@@ -89,32 +96,38 @@ func _process(delta):
 	if velocity.y < 0:
 		$AnimatedSprite2D.play("up_walk")
 	elif velocity.y > 0 or velocity.x != 0:
-		$AnimatedSprite2D.play("down_walk")
+		if velocity.x == 0:
+			$AnimatedSprite2D.play("down_walk")
 		if velocity.x > 0:
 			$AnimatedSprite2D.play("right_walk")
 		if velocity.x < 0:
 			$AnimatedSprite2D.play("left_walk")
 	#(otherwise just leave the sprite as is, unless shooting)
-	
+		
 	# If not moving then change sprite based on direction of fire
 	if shoot_direction.y >= 0 and velocity.length() == 0:
 		if shoot_direction.x > 0:
 			$AnimatedSprite2D.play("right_walk")
+			$AnimatedSprite2D.stop()
 		elif shoot_direction.x < 0:
 			$AnimatedSprite2D.play("left_walk")
+			$AnimatedSprite2D.stop()
 		else:
 			$AnimatedSprite2D.play("down_walk")
+			$AnimatedSprite2D.stop()
 			
 	# I say where my position is every frame, move or not
 	# (since Zombie movement depends on this)
 	player_detected.emit(position, delta)
 	
 	if player_hp <= 0:
-		queue_free()
+		is_dead = true
+		$AnimatedSprite2D.play("dead")
 	
 	if player_damage_visibility > 0:
 		player_damage_visibility = maxf(player_damage_visibility - 0.01, 0)
 		modulate = Color(1, 1 - player_damage_visibility, 1 - player_damage_visibility)
+
 # TODO: manage rate of fire
 func fire_bullet(dir: Vector2):
 	current_weapon_cooldown = weapon_cooldown_time
@@ -133,6 +146,9 @@ func fire_bullet(dir: Vector2):
 	
 
 func _on_collide_with_zombie(zombie_damage):
+	if is_dead:
+		player_damage_visibility = 1.0
+		return
 	if player_damage_visibility == 0 && is_dashing == false:
 		player_damage_visibility = 1.0
 		player_hp = player_hp - zombie_damage

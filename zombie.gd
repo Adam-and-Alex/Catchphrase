@@ -4,6 +4,8 @@ extends CharacterBody2D
 const Zombie = preload("res://zombie.gd")
 const Bullet = preload("res://bullet.tscn")
 const Player = preload("res://player.gd")
+const tombstone_scene: PackedScene = preload("res://tombstone.tscn")
+
 # Zombie state
 var chase_speed = randi_range(150, 250)
 var starting_position: Vector2 = Vector2.ZERO
@@ -21,7 +23,7 @@ var scatter_speed = 0.0
 var MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
 # Sometimes zombies explode when the die
-var is_exploding_zombie = true
+var is_exploding_zombie = false
 var explosion_bullets = 1.0
 
 # Knockback
@@ -35,11 +37,16 @@ var default_zombie_damage = 10
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	$AnimatedSprite2D.play("front")
+	$AnimatedSprite2D.stop()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if zombie_hp <= 0:
+		var tombstone_instance = tombstone_scene.instantiate()
+		tombstone_instance.position = position
+		get_tree().root.add_child(tombstone_instance)
 		queue_free()
+
 		# Zombie explodes!?
 		if is_exploding_zombie and explosion_bullets > 0:
 			var bullet_dir_offset = randf()*2.0*PI
@@ -52,9 +59,8 @@ func _process(delta):
 		zombie_damage_visibility = maxf(zombie_damage_visibility - 0.01, 0)
 		modulate = Color(1, 1 - zombie_damage_visibility, 1 - zombie_damage_visibility)
 
-
 # Handles collisions
-func _physics_process(delta):
+func _physics_process(delta):		
 	# Knockback			
 	knockback = knockback.move_toward(Vector2.ZERO, knockback_resistance)
 	velocity += knockback
