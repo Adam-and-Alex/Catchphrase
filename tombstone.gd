@@ -149,11 +149,24 @@ const all_boons = {
 		"category": "weapon",
 		"amount": 0.02,
 	},
+	"More_Bullets":  {
+		"key":  "More_Bullets",
+		"description": "More bullets per shot",
+		"weight": 20, # Rarer
+		"category": "weapon"
+	},
 	"Teleport":  {
 		"key":  "Teleport",
 		"description": "Have another teleport",
 		"weight": 15, # Rare-ish
 		"category": "movement",
+	},
+	"More_Speed":  {
+		"key":  "More_Speed",
+		"description": "Go faster",
+		"weight": 15, # Rare-ish
+		"category": "movement",
+		"amount": 20,
 	},
 	"Zombie_Bounces": {
 		"key": "Zombie_Bounces",

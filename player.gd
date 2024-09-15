@@ -7,6 +7,7 @@ const Tombstone = preload("res://tombstone.gd")
 
 # Player movement state:
 const NORMAL_SPEED = 400
+const MAX_NORMAL_SPEED = 600
 const DASH_SPEED = 1200
 var speed = NORMAL_SPEED
 var dash_ability = true
@@ -25,6 +26,8 @@ const MAX_TOMBSTONE_BOUNCE = 4
 var mob_bounce = 0
 var tombstone_bounce = 1
 var mob_pierce = 0 #TODO need to make this work
+const MAX_BULLETS_PER_SHOT = 4 #(3 in direction of fire, 1 behind you for 4th)
+var num_bullets_per_shot = 1
 
 # Health state
 const MAX_MAX_HP = 400
@@ -194,7 +197,6 @@ func _process(delta):
 func fire_bullet(dir: Vector2):
 	current_weapon_cooldown = weapon_cooldown_time
 	
-	var b = bullet_scene.instantiate()
 	#TODO: need to fire with the collision (center + (0,32)) at your feet
 	# with a reduced MUZZLE_OFFSET*dir and then use layers so the bullet's visibility
 	# is sensible 
@@ -204,13 +206,28 @@ func fire_bullet(dir: Vector2):
 		#(if enough collisions then just fire from base since you can't see
 		# where they come from anyway and you can't get dead zones)
 		
+	var b = bullet_scene.instantiate()
 	var bullet_position = position + muzzle_offset*dir
+	var direction = 0.0
 	if dir.length() > 0:
-		b.start(bullet_position, dir.angle(), bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)
-	else: 
-		b.start(bullet_position, 0.0, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)
-		
+		direction = dir.angle()
+	b.start(bullet_position, direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
 	get_tree().root.add_child(b)
+
+	#TODO: WIP this doesn't yet do anything
+
+	# 2nd and 3rd shots, either side
+	if num_bullets_per_shot == 2 or num_bullets_per_shot == 3:
+		for ii in range(num_bullets_per_shot - 1):
+			var bb = bullet_scene.instantiate()
+			var dir_offset = PI*0.1
+			#TODO: make this swivel from side to side
+			bb.start(bullet_position, direction + dir_offset, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+			
+	if num_bullets_per_shot == 4:
+		var bb = bullet_scene.instantiate()
+		bb.start(bullet_position, 2*PI - direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+		get_tree().root.add_child(bb)
 
 func teleport():
 	num_teleports = num_teleports - 1
@@ -271,6 +288,13 @@ func boon_faster_weapon(amount: float) -> bool:
 	else:
 		return false
 
+func boon_more_bullets_per_shot() -> bool:
+	if num_bullets_per_shot < MAX_BULLETS_PER_SHOT: 
+		num_bullets_per_shot += 1
+		return true
+	else:
+		return false
+
 func boon_zombie_bounces(amount: int) -> bool:
 	if mob_bounce < MAX_MOB_BOUNCE: 
 		mob_bounce += amount
@@ -284,3 +308,12 @@ func boon_tombstone_bounces(amount: int) -> bool:
 		return true
 	else:
 		return false
+
+func boon_more_speed(amount: int) -> bool:
+	if speed < MAX_NORMAL_SPEED:
+		speed += amount
+		return true
+	else:
+		return false
+	
+	

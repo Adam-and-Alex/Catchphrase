@@ -137,9 +137,19 @@ func receive_boon(boon_info: Dictionary):
 		if not $Player.boon_faster_weapon(boon_info.amount):
 			fallback_boon()
 		
+	elif boon_info.key == "More_Bullets":
+		recognized_boon = true
+		if not $Player.boon_more_bullets_per_shot():
+			fallback_boon()
+		
 	elif boon_info.key == "Teleport":
 		recognized_boon = true
 		if not $Player.boon_another_teleport():
+			fallback_boon()
+
+	elif boon_info.key == "More_Speed":
+		recognized_boon = true
+		if not $Player.boon_more_speed(boon_info.amount):
 			fallback_boon()
 	
 	elif boon_info.key == "Zombie_Bounces":
