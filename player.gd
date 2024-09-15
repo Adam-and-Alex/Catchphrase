@@ -8,7 +8,7 @@ const Tombstone = preload("res://tombstone.gd")
 # Player state:
 const NORMAL_SPEED = 400
 const DASH_SPEED = 1200
-const speed = NORMAL_SPEED
+var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
 var is_dead = false
@@ -71,6 +71,7 @@ func _physics_process(delta):
 func _process(delta):
 	if is_dead:
 		return
+	$AnimatedSprite2D.z_index = position.y
 	
 	velocity = Vector2.ZERO #Player Movement Vector
 	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")

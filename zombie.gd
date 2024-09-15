@@ -44,6 +44,8 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	$AnimatedSprite2D.z_index = position.y
+	
 	if zombie_hp <= 0:
 		var tombstone_instance = tombstone_scene.instantiate()
 		tombstone_instance.position = position

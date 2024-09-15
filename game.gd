@@ -39,7 +39,10 @@ func add_zombie():
 		add_child(zombie_instance)
 
 func _ready():
-	pass
+	$PlayerHealth.z_index = 1000
+	$CanPlayerDash.z_index = 1000
+	$TimeElapsed.z_index = 1000
+	$Instructions.z_index = 1000
 	
 func start_game():	
 	$Instructions.hide()

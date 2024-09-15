@@ -35,6 +35,9 @@ func _ready():
 func _physics_process(delta):
 	pass
 
+func _process(delta):
+	$AnimatedSprite2D.z_index = position.y
+
 func _on_collide_with_player():
 	if has_boon:
 		has_boon = false
