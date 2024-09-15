@@ -101,6 +101,7 @@ script = ExtResource("1_7sr07")
 knockback_resistance = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(-1, -33)
 sprite_frames = SubResource("SpriteFrames_y0nam")
 animation = &"back"
 
@@ -108,7 +109,6 @@ animation = &"back"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 show_behind_parent = true
-position = Vector2(0, 28)
 rotation = 1.5708
 shape = SubResource("CapsuleShape2D_bc6ls")
 
