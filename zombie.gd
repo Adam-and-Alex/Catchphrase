@@ -24,10 +24,6 @@ var scatter_angle = 0.0
 var scatter_speed = 0.0
 const MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
-# Sometimes zombies explode when the die
-var is_exploding_zombie = false
-var explosion_bullets = 1.0
-
 # Knockback
 @export var knockback_resistance: float = 10
 var knockback = Vector2.ZERO
@@ -47,7 +43,7 @@ func _ready():
 	$AnimatedSprite2D.stop()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta):
+func _process(_delta):
 	$AnimatedSprite2D.z_index = position.y
 	
 	if zombie_damage_visibility > 0:
@@ -55,7 +51,7 @@ func _process(delta):
 		modulate = Color(1, 1 - zombie_damage_visibility, 1 - zombie_damage_visibility)
 
 # Handles collisions
-func _physics_process(delta):		
+func _physics_process(_delta):		
 	# Knockback			
 	knockback = knockback.move_toward(Vector2.ZERO, knockback_resistance)
 	velocity += knockback
@@ -84,7 +80,7 @@ func _physics_process(delta):
 					damage = default_zombie_damage
 				colliding_tombstone._on_collide_with_zombie(damage)
 				
-func _on_player_player_detected(_player_position: Vector2, delta):
+func _on_player_player_detected(_player_position: Vector2, _delta):
 	player_position = _player_position
 	if (player_position.y < position.y):
 		$AnimatedSprite2D.play("back")
@@ -138,6 +134,8 @@ func _on_collide_with_bullet(bullet: Bullet):
 	knockback = knockback + bullet_velocity.normalized()*knockback_strength
 	zombie_hp = zombie_hp - bullet_damage
 	zombie_damage_visibility = 1.0
+
+	#TODO pierce
 	
 	if zombie_hp <= 0:
 		var tombstone_instance = tombstone_scene.instantiate()
@@ -145,12 +143,13 @@ func _on_collide_with_bullet(bullet: Bullet):
 		get_tree().root.add_child(tombstone_instance)
 		queue_free()
 
-		# Zombie explodes!?
-		if is_exploding_zombie and explosion_bullets > 0:
+		# Bullet fragments on death
+		var bouncing_bullets = bullet.mob_bounce
+		if bouncing_bullets > 0:
 			var bullet_dir_offset = randf()*2.0*PI
-			for i in range(explosion_bullets):
+			for i in range(bouncing_bullets):
 				var b = bullet_scene.instantiate()
-				b.start(position, bullet_dir_offset + 2.0*PI*i/explosion_bullets, b.bullet_scale)
+				b.make_bounce(bullet, bullet_dir_offset + 2.0*PI*i/bouncing_bullets)
 				get_tree().root.add_child(b)	
 
 # Effect of being scatters finishes

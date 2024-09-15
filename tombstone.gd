@@ -5,6 +5,7 @@ const zombie_scene: PackedScene = preload("res://zombie.tscn")
 const Player = preload("res://player.gd")
 const Zombie = preload("res://zombie.gd")
 const Game = preload("res://game.gd")
+const Tombstone = preload("res://tombstone.gd")
 const Bullet = preload("res://bullet.gd")
 
 # Tombstone misc state
@@ -14,7 +15,6 @@ var tombstone_hp = 20
 
 # Boon state
 var has_boon = false
-var chance_of_boon = 1.0 #0.25
 var GAME_PATH = "/root/Game"
 var game: Game
 
@@ -24,6 +24,12 @@ const min_resurrection_time = 1.0
 # Need this to be injected so we can wire up the player_detected signal
 # when a zombie gets created
 var player: Player
+
+func destroy(from: Node):
+	position = from.position
+	is_destroyed = true
+	$AnimatedSprite2D.play("destroyed")
+	$CollisionShape2D.disabled = true
 
 func resurrect(_player: Player):
 	player = _player
@@ -38,6 +44,8 @@ func _ready():
 			min_resurrection_time + (max_resurrection_time - min_resurrection_time)*randf()
 		)
 		$AnimatedSprite2D.play("resurrecting")
+	elif is_destroyed:
+		$AnimatedSprite2D.play("destroyed")
 	else:
 		$AnimatedSprite2D.play("dead")
 		
@@ -51,6 +59,7 @@ func _process(delta):
 func _on_collide_with_player():
 	if has_boon:
 		has_boon = false
+		remove_from_group("boons")
 		$AnimatedSprite2D.play("destroyed")
 		$CollisionShape2D.disabled = true
 		game.receive_boon(pick_boon())
@@ -64,6 +73,13 @@ func _on_collide_with_zombie(damage: float):
 		$AnimatedSprite2D.play("destroyed")
 		$CollisionShape2D.disabled = true
 		
+	# In fact, zombie takes the boon!
+	if has_boon:
+		remove_from_group("boons")
+		$AnimatedSprite2D.play("destroyed")
+		$CollisionShape2D.disabled = true
+		
+		
 # Shot with a bullet!
 func _on_collide_with_bullet(bullet: Bullet):
 	if not is_resurrecting and not is_destroyed:
@@ -73,12 +89,16 @@ func _on_collide_with_bullet(bullet: Bullet):
 		if tombstone_hp <= 0:
 			is_destroyed = true
 			var random_chance = randf()
-			if random_chance < chance_of_boon:
+			game = get_node(GAME_PATH) as Game
+			if random_chance < game.chance_of_boon:
 				has_boon = true
-				game = get_node(GAME_PATH) as Game
+				add_to_group("boons")
 				$AnimatedSprite2D.play("boon")
 				$CollisionShape2D.scale = Vector2(2, 1.2) #(x and y are reversed for some reason)
 				$CollisionShape2D.position.y = $CollisionShape2D.position.y - 5
+				# After this, bullets will go through boons
+				self.set_collision_layer_value(2, false)
+				self.set_collision_layer_value(4, true)
 			else:
 				$AnimatedSprite2D.play("destroyed")
 				$CollisionShape2D.disabled = true
@@ -103,12 +123,49 @@ const all_boons = {
 		# Boon specific
 		"amount": 10,
 	},
+	"Max_Health": {
+		# common keys:
+		"key": "Max_Health", #(include this twice so we can have eg "MinHealth", .. "MaxHealth" top level keys 
+		"description": "Higher max health", #(this goes in Last Boon text)
+		"weight": 10, # rare
+		# Boon specific
+		"amount": 10,
+	},
 	"Bigger_Bullets":  {
 		"key":  "Bigger_Bullets",
 		"description": "Increased bullet size",
 		"weight": 30, # Common
 		"amount": 0.2,
 	},
+	"Faster_Bullets":  {
+		"key":  "Faster_Bullets",
+		"description": "Increased bullet speed",
+		"weight": 20, # Rarer
+		"amount": 0.02,
+	},
+	"Teleport":  {
+		"key":  "Teleport",
+		"description": "Have another teleport",
+		"weight": 15, # Rare-ish
+	},
+	"Zombie_Bounces": {
+		"key": "Zombie_Bounces",
+		"description": "Increased bounces off of zombies",
+		"weight": 10, #prety rare
+		"amount": 1,
+	},
+	"Tombstone_Bounces": {
+		"key": "Tombstone_Bounces",
+		"description": "Increased bounces of tombstones",
+		"weight": 20,
+		"amount": 1,
+	},
+	"More_Boons": {
+		"key": "More_Boons",
+		"description": "More boons!",
+		"weight": 20,
+		"amount": 0.25,
+	}
 }	
 
 func pick_boon() -> Dictionary:

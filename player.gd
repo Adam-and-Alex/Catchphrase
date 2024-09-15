@@ -14,20 +14,31 @@ var is_dashing = false
 
 # Weapon state
 const MUZZLE_OFFSET = 32
-var weapon_cooldown_time = 0.2 #(secs)
-var current_weapon_cooldown = 0
-const MAX_BULLET_SCALE = 5
+const MIN_WEAPON_COOLDOWN = 0.1
+const INIT_WEAPON_COOLDOWN = 0.2
+var weapon_cooldown_time = INIT_WEAPON_COOLDOWN #(secs)
+var current_weapon_cooldown = 0 #(tracks where we are between 0 and weapon_cooldown_time)
+const MAX_BULLET_SCALE = 3
 var bullet_scale = 1
+const MAX_MOB_BOUNCE = 6
+const MAX_TOMBSTONE_BOUNCE = 4
+var mob_bounce = 0
+var tombstone_bounce = 1
+var mob_pierce = 0 #TODO need to make this work
 
 # Health state
+const MAX_MAX_HP = 400
 const MAX_HP = 100
+var max_player_hp = MAX_HP
 var player_hp = MAX_HP
 var is_dead = false
 var player_damage_visibility = 0
 
 # Size of area
+const MAX_TELEPORTS = 5
 var player_area: Vector2
 var num_teleports = 1
+var teleport_ability = false #(use dash cooldown)
 
 # Temp collision state
 var num_collisions = 0
@@ -41,6 +52,7 @@ func _on_dash_duration_timeout():
 	is_dashing = false
 func _on_dash_cooldown_timeout():
 	dash_ability = true
+	teleport_ability = true
 
 # Each frame, the player entity advertizes its location
 # (nice thing is that mobs out of eyesight could ignore it)
@@ -61,6 +73,11 @@ func start_game(game_area: Vector2):
 	is_dashing = false
 	is_dead = false
 	num_teleports = 1
+	teleport_ability = true
+	weapon_cooldown_time = INIT_WEAPON_COOLDOWN
+	mob_bounce = 0
+	tombstone_bounce = 1
+	mob_pierce = 0
 
 # Handles collisions
 func _physics_process(delta):
@@ -84,15 +101,23 @@ func _physics_process(delta):
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
+	if is_dead:
+		return
+		
+	# (Don't allow the player out of bounds)
 	if player_area and player_area.x > 0 and player_area.y > 0 and \
 		(position.y < 0 or position.y > player_area.y or \
 		position.x < 0 or position.x > player_area.x):
-		print_debug("%d %d %d %d" % [position.x, player_area.x, position.y, player_area.y])
 		player_hp -= 20
-		
-	if is_dead:
-		return
+
+	# Set layering		
 	$AnimatedSprite2D.z_index = position.y
+	
+	if Input.is_action_pressed("teleport") and num_teleports > 0 and teleport_ability:
+		teleport_ability = false
+		$DashCooldown.start()
+		teleport()
+	
 	
 	velocity = Vector2.ZERO #Player Movement Vector
 	velocity.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
@@ -181,12 +206,25 @@ func fire_bullet(dir: Vector2):
 		
 	var bullet_position = position + muzzle_offset*dir
 	if dir.length() > 0:
-		b.start(bullet_position, dir.angle(), bullet_scale)
+		b.start(bullet_position, dir.angle(), bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)
 	else: 
-		b.start(bullet_position, 0.0, bullet_scale)
+		b.start(bullet_position, 0.0, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)
 		
 	get_tree().root.add_child(b)
-	
+
+func teleport():
+	num_teleports = num_teleports - 1
+	var new_position = Vector2(position)
+	while new_position.distance_to(position) < 100:
+		var rng = RandomNumberGenerator.new()
+		@warning_ignore("narrowing_conversion")
+		var rndX = rng.randi_range(25, player_area.x - 25)
+		@warning_ignore("narrowing_conversion")
+		var rndY = rng.randi_range(25, player_area.y - 25)
+		new_position = Vector2(rndX, rndY)
+		
+	position.x = new_position.x
+	position.y = new_position.y
 
 func _on_collide_with_zombie(zombie_damage):
 	if is_dead:
@@ -199,10 +237,50 @@ func _on_collide_with_zombie(zombie_damage):
 ##### BOONS
 
 func boon_increase_health(health_bonus: int):
-	player_hp += health_bonus
+	if player_hp < max_player_hp:
+		player_hp += health_bonus
+		return true
+	else:
+		return false
+
+func boon_increase_max_health(max_health_bonus: int):
+	if max_player_hp < MAX_MAX_HP:
+		max_player_hp += max_health_bonus
+		return true
+	else:
+		return false
+	
 func boon_increase_bullet_size(size_increase: float) -> bool:
 	if bullet_scale < MAX_BULLET_SCALE:
 		bullet_scale += size_increase
+		return true
+	else:
+		return false
+
+func boon_another_teleport() -> bool:
+	if num_teleports < MAX_TELEPORTS:
+		num_teleports = num_teleports + 1
+		return true
+	else:
+		return false 
+		
+func boon_faster_weapon(amount: float) -> bool:		
+	if weapon_cooldown_time > MIN_WEAPON_COOLDOWN:
+		weapon_cooldown_time = weapon_cooldown_time - amount
+		return true
+	else:
+		return false
+
+func boon_zombie_bounces(amount: int) -> bool:
+	if mob_bounce < MAX_MOB_BOUNCE: 
+		mob_bounce += amount
+		return true
+	else:
+		return false
+
+func boon_tombstone_bounces(amount: int) -> bool:
+	if tombstone_bounce < MAX_TOMBSTONE_BOUNCE: 
+		tombstone_bounce += amount
 		return true
 	else:
 		return false

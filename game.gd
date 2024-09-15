@@ -17,6 +17,8 @@ var time_elapsed = 0.0
 var time_since_last_spawn = 0.0
 var game_round = 0
 var game_area: Vector2
+var MAX_CHANCE_OF_BOON = 0.7
+var chance_of_boon = 0.35
 
 func build_random_entity_position():
 	var rng = RandomNumberGenerator.new()
@@ -44,6 +46,7 @@ func _ready():
 	$CanPlayerDash.z_index = 1000
 	$TimeElapsed.z_index = 1000
 	$Instructions.z_index = 1000
+	$CanPlayerDash.z_index = 1000
 	
 func start_game():	
 	$Instructions.hide()
@@ -53,6 +56,7 @@ func start_game():
 	time_since_last_spawn = 0.0
 	game_round = 0	
 	game_started = true
+	chance_of_boon = 0.25
 	
 	$Player.position = build_random_entity_position()
 	$Player.start_game(game_area)
@@ -75,10 +79,17 @@ func _process(delta):
 			time_elapsed += delta
 			time_since_last_spawn += delta
 			$PlayerHealth.text = "%d" % $Player.player_hp
-		if $Player.dash_ability:			
-			$CanPlayerDash.text = "RT: Dash!\nTeleport Disabled"
-		else:
-			$CanPlayerDash.text = "Dash Cooldown\nTeleport Disabled"
+		var dash_ability_str = "Dash Cooldown"			
+		if $Player.dash_ability:
+			dash_ability_str = "RT: Dash!"
+		var teleport_ability_str = "No teleports left"
+		if $Player.num_teleports == 1:
+			teleport_ability_str = "LT: 1 teleport left"
+		elif $Player.num_teleports > 1:
+			teleport_ability_str = "LT: %d teleports left" % $Player.num_teleports
+			
+		$CanPlayerDash.text = "%s\n%s" % [ dash_ability_str, teleport_ability_str ]
+			
 	else:
 		$LastBoon.text = ""
 		$PlayerHealth.text = "Dead"
@@ -97,15 +108,68 @@ func _process(delta):
 ##### BOONS
 	
 func fallback_boon():	
-	$LastBoon.text = "Fallback Boon: %s" % "Health :("
-	$Player.boon_increase_health(10)
+	$LastBoon.text = "Fallback Boon: %s" % "Health"
+	if not $Player.boon_increase_health(5.0):
+		$LastBoon.text = "Fallback Boon: %s" % "More Max Health"
+		if not $Player.boon_increase_max_health(1.0):
+			$LastBoon.text = "It was a dud :(" 
 
 func receive_boon(boon_info: Dictionary): 	
 	$LastBoon.text = "Last Boon: %s" % boon_info.description
+	var recognized_boon = false
 	if boon_info.key == "Health":
-		$Player.boon_increase_health(boon_info.amount)
-		
-	elif boon_info.key == "Bigger_Bullets":
-		if not $Player.boon_increase_bullet_size(boon_info.amount):\
+		recognized_boon = true
+		if not $Player.boon_increase_health(boon_info.amount):
+			fallback_boon()
+
+	if boon_info.key == "Max_Health":
+		recognized_boon = true
+		if not $Player.boon_increase_max_health(boon_info.amount):
 			fallback_boon()
 		
+	elif boon_info.key == "Bigger_Bullets":
+		recognized_boon = true
+		if not $Player.boon_increase_bullet_size(boon_info.amount):
+			fallback_boon()
+
+	elif boon_info.key == "Faster_Bullets":
+		recognized_boon = true
+		if not $Player.boon_faster_weapon(boon_info.amount):
+			fallback_boon()
+		
+	elif boon_info.key == "Teleport":
+		recognized_boon = true
+		if not $Player.boon_another_teleport():
+			fallback_boon()
+	
+	elif boon_info.key == "Zombie_Bounces":
+		recognized_boon = true
+		if not $Player.boon_zombie_bounces(boon_info.amount):
+			fallback_boon()
+		
+	elif boon_info.key == "Tombstone_Bounces":
+		recognized_boon = true
+		if not $Player.boon_tombstone_bounces(boon_info.amount):
+			fallback_boon()
+
+	elif boon_info.key == "More_Boons":
+		recognized_boon = true
+		if not boon_increase_boons(boon_info.amount):
+			fallback_boon()
+	
+	if not recognized_boon:
+		print_debug("UNRECOGNIZED BOON %s" % boon_info.key)
+	else:
+		var children_to_delete = get_tree().get_nodes_in_group("boons")
+		for child in children_to_delete:
+			var tombstone_instance = tombstone_scene.instantiate()
+			tombstone_instance.destroy(child)
+			child.queue_free()
+			add_child(tombstone_instance)
+
+func boon_increase_boons(amount: float) -> bool:
+	if chance_of_boon < MAX_CHANCE_OF_BOON:
+		chance_of_boon += amount
+		return true
+	else:
+		return false

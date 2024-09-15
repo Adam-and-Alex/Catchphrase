@@ -15,7 +15,7 @@ animations = [{
 }]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ioq5l"]
-radius = 4.0
+radius = 6.53126
 
 [node name="Bullet" type="CharacterBody2D"]
 collision_layer = 4
@@ -28,9 +28,10 @@ sprite_frames = SubResource("SpriteFrames_4nyvd")
 animation = &"bullet_animation"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.7, 1.4)
 shape = SubResource("CircleShape2D_ioq5l")
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-position = Vector2(0, -16)
+position = Vector2(0, -24)
 
 [connection signal="screen_exited" from="VisibleOnScreenNotifier2D" to="." method="_on_visible_on_screen_notifier_2d_screen_exited"]

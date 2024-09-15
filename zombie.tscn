@@ -95,10 +95,9 @@ height = 32.0
 
 [node name="Zombie" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 15
+collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_7sr07")
-knockback_resistance = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(-1, -33)
