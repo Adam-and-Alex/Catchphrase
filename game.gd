@@ -111,7 +111,7 @@ func fallback_boon():
 	$LastBoon.text = "Fallback Boon: %s" % "Health"
 	if not $Player.boon_increase_health(5.0):
 		$LastBoon.text = "Fallback Boon: %s" % "More Max Health"
-		if not $Player.boon_increase_max_health(1.0):
+		if not $Player.boon_increase_max_health(2.0):
 			$LastBoon.text = "It was a dud :(" 
 
 func receive_boon(boon_info: Dictionary): 	

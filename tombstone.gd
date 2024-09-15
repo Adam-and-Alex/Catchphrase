@@ -17,6 +17,7 @@ var tombstone_hp = 20
 var has_boon = false
 var GAME_PATH = "/root/Game"
 var game: Game
+var boon_info: Dictionary
 
 # How long it takes for a zombie to spawn
 const max_resurrection_time = 3.0
@@ -62,7 +63,7 @@ func _on_collide_with_player():
 		remove_from_group("boons")
 		$AnimatedSprite2D.play("destroyed")
 		$CollisionShape2D.disabled = true
-		game.receive_boon(pick_boon())
+		game.receive_boon(boon_info)
 
 func _on_collide_with_zombie(damage: float):
 	# If zombies are close to players and then connect with tombstones 
@@ -93,7 +94,8 @@ func _on_collide_with_bullet(bullet: Bullet):
 			if random_chance < game.chance_of_boon:
 				has_boon = true
 				add_to_group("boons")
-				$AnimatedSprite2D.play("boon")
+				boon_info = pick_boon()
+				$AnimatedSprite2D.play("boon_%s" % boon_info["category"])
 				$CollisionShape2D.scale = Vector2(2, 1.2) #(x and y are reversed for some reason)
 				$CollisionShape2D.position.y = $CollisionShape2D.position.y - 5
 				# After this, bullets will go through boons
@@ -120,51 +122,59 @@ const all_boons = {
 		"key": "Health", #(include this twice so we can have eg "MinHealth", .. "MaxHealth" top level keys 
 		"description": "Healing!", #(this goes in Last Boon text)
 		"weight": 30, # 30 is Common
+		"category": "health", #health, movement, weapon, environment
 		# Boon specific
 		"amount": 10,
 	},
 	"Max_Health": {
 		# common keys:
-		"key": "Max_Health", #(include this twice so we can have eg "MinHealth", .. "MaxHealth" top level keys 
-		"description": "Higher max health", #(this goes in Last Boon text)
-		"weight": 10, # rare
+		"key": "Max_Health", 
+		"description": "Higher max health", 
+		"weight": 15, # rare
+		"category": "health",
 		# Boon specific
-		"amount": 10,
+		"amount": 5,
 	},
 	"Bigger_Bullets":  {
 		"key":  "Bigger_Bullets",
 		"description": "Increased bullet size",
 		"weight": 30, # Common
+		"category": "weapon",
 		"amount": 0.2,
 	},
 	"Faster_Bullets":  {
 		"key":  "Faster_Bullets",
 		"description": "Increased bullet speed",
 		"weight": 20, # Rarer
+		"category": "weapon",
 		"amount": 0.02,
 	},
 	"Teleport":  {
 		"key":  "Teleport",
 		"description": "Have another teleport",
 		"weight": 15, # Rare-ish
+		"category": "movement",
 	},
 	"Zombie_Bounces": {
 		"key": "Zombie_Bounces",
 		"description": "Increased bounces off of zombies",
 		"weight": 10, #prety rare
+		"category": "environment",
 		"amount": 1,
 	},
 	"Tombstone_Bounces": {
 		"key": "Tombstone_Bounces",
-		"description": "Increased bounces of tombstones",
+		"description": "Increased bounces off tombstones",
 		"weight": 20,
+		"category": "environment",
 		"amount": 1,
 	},
 	"More_Boons": {
 		"key": "More_Boons",
 		"description": "More boons!",
 		"weight": 20,
-		"amount": 0.25,
+		"category": "environment",
+		"amount": 0.05,
 	}
 }	
 
