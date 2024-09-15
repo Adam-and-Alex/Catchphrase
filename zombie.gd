@@ -3,6 +3,7 @@ extends CharacterBody2D
 # Imports:
 const Zombie = preload("res://zombie.gd")
 const Player = preload("res://player.gd")
+const Bullet = preload("res://bullet.gd")
 const Tombstone = preload("res://tombstone.gd")
 const tombstone_scene = preload("res://tombstone.tscn")
 const bullet_scene = preload("res://bullet.tscn")
@@ -36,6 +37,9 @@ var zombie_hp = MAX_HP
 var zombie_damage_visibility = 0
 var default_zombie_damage = 10
 
+# Transient state
+var player_position: Vector2
+
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	add_to_group("clear_on_start")
@@ -46,20 +50,6 @@ func _ready():
 func _process(delta):
 	$AnimatedSprite2D.z_index = position.y
 	
-	if zombie_hp <= 0:
-		var tombstone_instance = tombstone_scene.instantiate()
-		tombstone_instance.position = position
-		get_tree().root.add_child(tombstone_instance)
-		queue_free()
-
-		# Zombie explodes!?
-		if is_exploding_zombie and explosion_bullets > 0:
-			var bullet_dir_offset = randf()*2.0*PI
-			for i in range(explosion_bullets):
-				var b = bullet_scene.instantiate()
-				b.start(position, bullet_dir_offset + 2.0*PI*i/explosion_bullets)
-				get_tree().root.add_child(b)
-		
 	if zombie_damage_visibility > 0:
 		zombie_damage_visibility = maxf(zombie_damage_visibility - 0.01, 0)
 		modulate = Color(1, 1 - zombie_damage_visibility, 1 - zombie_damage_visibility)
@@ -88,9 +78,14 @@ func _physics_process(delta):
 				colliding_player._on_collide_with_zombie(default_zombie_damage)
 			if collider is Tombstone:
 				var colliding_tombstone = collider as Tombstone
-				colliding_tombstone._on_collide_with_zombie()
+				var damage = 0
+				# If a zombie is close to a player then they can break tombstones 
+				if player_position and player_position.distance_to(position) < 20:
+					damage = default_zombie_damage
+				colliding_tombstone._on_collide_with_zombie(damage)
 				
-func _on_player_player_detected(player_position: Vector2, delta):
+func _on_player_player_detected(_player_position: Vector2, delta):
+	player_position = _player_position
 	if (player_position.y < position.y):
 		$AnimatedSprite2D.play("back")
 	elif (player_position.x > position.x):
@@ -133,11 +128,30 @@ func _on_collide_with_other_character(velo: Vector2, damping: float):
 	$ScatterTimer.start()
 
 # Shot with a bullet!
-func _on_collide_with_bullet(bullet_velocity: Vector2, knockback_strength: float, bullet_damage: float):
+func _on_collide_with_bullet(bullet: Bullet):
+	
+	var bullet_velocity = bullet.velocity
+	var knockback_strength = bullet.BULLET_KNOCKBACK
+	var bullet_damage = bullet.default_bullet_damage
+
 	# Very basic knockback
 	knockback = knockback + bullet_velocity.normalized()*knockback_strength
 	zombie_hp = zombie_hp - bullet_damage
 	zombie_damage_visibility = 1.0
+	
+	if zombie_hp <= 0:
+		var tombstone_instance = tombstone_scene.instantiate()
+		tombstone_instance.position = position
+		get_tree().root.add_child(tombstone_instance)
+		queue_free()
+
+		# Zombie explodes!?
+		if is_exploding_zombie and explosion_bullets > 0:
+			var bullet_dir_offset = randf()*2.0*PI
+			for i in range(explosion_bullets):
+				var b = bullet_scene.instantiate()
+				b.start(position, bullet_dir_offset + 2.0*PI*i/explosion_bullets, b.bullet_scale)
+				get_tree().root.add_child(b)	
 
 # Effect of being scatters finishes
 func _on_scatter_timer_timeout():

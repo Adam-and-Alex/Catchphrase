@@ -107,13 +107,13 @@ collision_mask = 10
 script = ExtResource("1_681mm")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -32)
 sprite_frames = SubResource("SpriteFrames_xcto0")
-animation = &"dead"
+animation = &"up_walk"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 show_behind_parent = true
-position = Vector2(1, 28.25)
-rotation = 1.5708
+rotation = 1.57079
 shape = SubResource("CapsuleShape2D_xu8tu")
 
 [node name="DashDuration" type="Timer" parent="."]

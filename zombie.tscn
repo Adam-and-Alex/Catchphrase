@@ -98,6 +98,7 @@ collision_layer = 2
 collision_mask = 15
 motion_mode = 1
 script = ExtResource("1_7sr07")
+knockback_resistance = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_y0nam")

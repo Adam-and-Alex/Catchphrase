@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bs8dssxcr4771" path="res://player.tscn" id="2_jk0uq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nemq3"]
-size = Vector2(10, 1024)
+size = Vector2(67.0605, 1024)
 
 [node name="Game" type="Node2D"]
 y_sort_enabled = true
@@ -37,7 +37,7 @@ collision_layer = 8
 collision_mask = 15
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
-position = Vector2(111, 222)
+position = Vector2(82, 230)
 shape = SubResource("RectangleShape2D_nemq3")
 
 [node name="RightWall" type="StaticBody2D" parent="."]
@@ -46,7 +46,7 @@ collision_layer = 8
 collision_mask = 15
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
-position = Vector2(1146, 221)
+position = Vector2(1173, 221)
 shape = SubResource("RectangleShape2D_nemq3")
 
 [node name="TopWall" type="StaticBody2D" parent="."]
@@ -56,7 +56,7 @@ collision_layer = 8
 collision_mask = 15
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
-position = Vector2(628.9, -98.3459)
+position = Vector2(629.163, -126.875)
 rotation = -1.56157
 shape = SubResource("RectangleShape2D_nemq3")
 
@@ -67,7 +67,7 @@ collision_layer = 8
 collision_mask = 15
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
-position = Vector2(625.108, 552.584)
+position = Vector2(621.859, 580.556)
 rotation = -1.56157
 shape = SubResource("RectangleShape2D_nemq3")
 
@@ -79,3 +79,9 @@ offset_bottom = 387.0
 text = "Press Enter To Start
 Survive as long as you can
 Shoot the tombstones of the fallen!"
+
+[node name="LastBoon" type="RichTextLabel" parent="."]
+offset_left = 823.0
+offset_top = 576.0
+offset_right = 1023.0
+offset_bottom = 637.0
