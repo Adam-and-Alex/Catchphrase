@@ -1,14 +1,20 @@
 extends Node2D
 
-var time_elapsed = 0.0
 
-@export var player_scene: PackedScene
-
+# Entities
 const tombstone_scene: PackedScene = preload("res://tombstone.tscn")
 const zombie_scene: PackedScene = preload("res://zombie.tscn")
+const Zombie = preload("res://zombie.gd")
+const Tombstone = preload("res://tombstone.gd")
+
+# Constants
 const NUM_ZOMBIES = 20
-var time_since_last_spawn = 0.0
 const SPAWN_FREQ_S = 5.0
+
+# Game state
+var game_started = false
+var time_elapsed = 0.0
+var time_since_last_spawn = 0.0
 var game_round = 0
 
 func build_random_entity_position():
@@ -33,27 +39,53 @@ func add_zombie():
 		add_child(zombie_instance)
 
 func _ready():
+	pass
+	
+func start_game():	
+	$Instructions.hide()
+	
+	# Reset state
+	time_elapsed = 0.0
+	time_since_last_spawn = 0.0
+	game_round = 0	
+	game_started = true
+	
 	$Player.position = build_random_entity_position()
+	$Player.start_game()
+	
+	var children_to_delete = get_tree().get_nodes_in_group("clear_on_start")
+	for child in children_to_delete:
+		child.queue_free()
+		
+	add_child($Player)		
 	for i in range(NUM_ZOMBIES):
 		add_zombie()
 
 func _process(delta):
+	if not game_started:
+		if Input.is_action_pressed("start_game"):
+			start_game()
+		
 	if not $Player.is_dead:
-		time_elapsed += delta
-		time_since_last_spawn += delta
-		$PlayerHealth.text = "%d" % $Player.player_hp
+		if game_started:
+			time_elapsed += delta
+			time_since_last_spawn += delta
+			$PlayerHealth.text = "%d" % $Player.player_hp
 		if $Player.dash_ability:			
-			$CanPlayerDash.text = "Dash!"
+			$CanPlayerDash.text = "RT: Dash!\nTeleport Disabled"
 		else:
-			$CanPlayerDash.text = ""
+			$CanPlayerDash.text = "Dash Cooldown\nTeleport Disabled"
 	else:
 		$PlayerHealth.text = "Dead"
-		$CanPlayerDash.text = ""		
+		$CanPlayerDash.text = ""	
+		game_started = false
+		$Instructions.show()
 		
-	$TimeElapsed.text = "%.1fs" % time_elapsed
-	if time_since_last_spawn > SPAWN_FREQ_S and not $Player.is_dead:
-		game_round = game_round + 1
-		time_since_last_spawn = 0.0
-		for i in range(game_round):
-			add_zombie()
+	if game_started:
+		$TimeElapsed.text = "%.1fs" % time_elapsed
+		if time_since_last_spawn > SPAWN_FREQ_S and not $Player.is_dead:
+			game_round = game_round + 1
+			time_since_last_spawn = 0.0
+			for i in range(game_round):
+				add_zombie()
 	

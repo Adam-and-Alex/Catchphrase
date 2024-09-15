@@ -3,7 +3,7 @@ extends CharacterBody2D
 # Imports:
 const Zombie = preload("res://zombie.gd")
 const Tombstone = preload("res://tombstone.gd")
-const Bullet = preload("res://bullet.tscn")
+const bullet_scene = preload("res://bullet.tscn")
 
 var BULLET_SPEED = 1400
 var BULLET_KNOCKBACK = 150
@@ -31,8 +31,11 @@ func _physics_process(delta):
 			colliding_zombie._on_collide_with_bullet(velocity, BULLET_KNOCKBACK, default_bullet_damage)
 		elif collider is Tombstone and not ignore_tombstones:
 			var bullet_dir_offset = randf()*2.0*PI
+			var colliding_tombstone = collider as Tombstone
+			colliding_tombstone._on_collide_with_bullet(default_bullet_damage)
+			# In addition to causing damage, every time you hit a tombstone bullet fragments bounce off
 			for i in range(2):
-				var b = Bullet.instantiate()
+				var b = bullet_scene.instantiate()
 				b.ignore_tombstones = true
 				b.start(position, bullet_dir_offset + PI*i)
 				get_tree().root.add_child(b)

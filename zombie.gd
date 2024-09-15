@@ -2,9 +2,10 @@ extends CharacterBody2D
 
 # Imports:
 const Zombie = preload("res://zombie.gd")
-const Bullet = preload("res://bullet.tscn")
 const Player = preload("res://player.gd")
-const tombstone_scene: PackedScene = preload("res://tombstone.tscn")
+const Tombstone = preload("res://tombstone.gd")
+const tombstone_scene = preload("res://tombstone.tscn")
+const bullet_scene = preload("res://bullet.tscn")
 
 # Zombie state
 var chase_speed = randi_range(150, 250)
@@ -12,15 +13,15 @@ var starting_position: Vector2 = Vector2.ZERO
 
 # Make Zombie movement more interesting, part 1
 # Every CONFUSION_PERIOD we add an error to the direction of movement
-var MAX_CONFUSION_ANGLE = PI/2.0 #(radians)
-var SCATTER_SPEED = 1000
+const MAX_CONFUSION_ANGLE = PI/2.0 #(radians)
+const SCATTER_SPEED = 1000
 var confusion_angle = 0.0
 
 # Make Zombie movement more interesting part 2
 var is_scattering = false
 var scatter_angle = 0.0
 var scatter_speed = 0.0
-var MAX_SCATTER_ANGLE = PI/6.0 #(radians)
+const MAX_SCATTER_ANGLE = PI/6.0 #(radians)
 
 # Sometimes zombies explode when the die
 var is_exploding_zombie = false
@@ -30,12 +31,14 @@ var explosion_bullets = 1.0
 @export var knockback_resistance: float = 10
 var knockback = Vector2.ZERO
 # Hp and damage system
-var zombie_hp = 30
+var MAX_HP = 30
+var zombie_hp = MAX_HP
 var zombie_damage_visibility = 0
 var default_zombie_damage = 10
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	add_to_group("clear_on_start")
 	$AnimatedSprite2D.play("front")
 	$AnimatedSprite2D.stop()
 
@@ -51,7 +54,7 @@ func _process(delta):
 		if is_exploding_zombie and explosion_bullets > 0:
 			var bullet_dir_offset = randf()*2.0*PI
 			for i in range(explosion_bullets):
-				var b = Bullet.instantiate()
+				var b = bullet_scene.instantiate()
 				b.start(position, bullet_dir_offset + 2.0*PI*i/explosion_bullets)
 				get_tree().root.add_child(b)
 		
@@ -81,6 +84,9 @@ func _physics_process(delta):
 			if collider is Player:
 				var colliding_player = collider as Player
 				colliding_player._on_collide_with_zombie(default_zombie_damage)
+			if collider is Tombstone:
+				var colliding_tombstone = collider as Tombstone
+				colliding_tombstone._on_collide_with_zombie()
 				
 func _on_player_player_detected(player_position: Vector2, delta):
 	if (player_position.y < position.y):

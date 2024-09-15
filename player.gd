@@ -1,23 +1,26 @@
 extends CharacterBody2D
 
 # Imports:
-var Bullet = preload("res://bullet.tscn")
+var bullet_scene = preload("res://bullet.tscn")
 const Zombie = preload("res://zombie.gd")
+const Tombstone = preload("res://tombstone.gd")
 
 # Player state:
-var NORMAL_SPEED = 400
-var DASH_SPEED = 1200
-var speed = NORMAL_SPEED
+const NORMAL_SPEED = 400
+const DASH_SPEED = 1200
+const speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
 var is_dead = false
 
 # Weapon state
-var MUZZLE_OFFSET = 32
+const MUZZLE_OFFSET = 32
 var weapon_cooldown_time = 0.2 #(secs)
 var current_weapon_cooldown = 0
 
-var player_hp = 100
+# Health state
+const MAX_HP = 100
+var player_hp = MAX_HP
 
 var player_damage_visibility = 0
 #TODO: lots of fun buffs: dash effects, speed, armor, touch effects, 
@@ -38,6 +41,14 @@ signal player_detected(player_position)
 func _ready():
 	$AnimatedSprite2D.play("down_walk")	
 
+func start_game():
+	player_damage_visibility = 0.0
+	player_hp = MAX_HP
+	$AnimatedSprite2D.play("down_walk")	
+	dash_ability = true
+	is_dashing = false
+	is_dead = false
+
 # Handles collisions
 func _physics_process(delta):
 	if is_dead:
@@ -52,6 +63,9 @@ func _physics_process(delta):
 			if collider is Zombie:
 				var colliding_zombie = collider as Zombie
 				colliding_zombie._on_collide_with_dashing_player(collision_info.get_collider_velocity())	
+		if collider is Tombstone:
+			var colliding_tombstone = collider as Tombstone
+			colliding_tombstone._on_collide_with_player()	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
@@ -87,8 +101,9 @@ func _process(delta):
 		if current_weapon_cooldown <= 0:
 			if shoot_direction.length() > 0:
 				fire_bullet(shoot_direction)
-			elif Input.is_action_pressed("fire_kb_test"):
-				fire_bullet(velocity)			
+			#TODO: have some key make you shoot in the direction of travel
+			#elif Input.is_action_pressed("TODO"):
+			#	fire_bullet(velocity)			
 		
 	# What sprite to use?	
 	# Pick sprite based on dir of movement
@@ -132,7 +147,7 @@ func _process(delta):
 func fire_bullet(dir: Vector2):
 	current_weapon_cooldown = weapon_cooldown_time
 	
-	var b = Bullet.instantiate()
+	var b = bullet_scene.instantiate()
 	#TODO: need to fire with the collision (center + (0,32)) at your feet
 	# with a reduced MUZZLE_OFFSET*dir and then use layers so the bullet's visibility
 	# is sensible 

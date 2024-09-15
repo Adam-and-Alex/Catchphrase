@@ -1,17 +1,35 @@
-[gd_scene load_steps=6 format=3 uid="uid://dhnmbb3geaiey"]
+[gd_scene load_steps=8 format=3 uid="uid://dhnmbb3geaiey"]
 
 [ext_resource type="Script" path="res://tombstone.gd" id="1_2d53x"]
 [ext_resource type="Texture2D" uid="uid://cq6b1i8qqsyk8" path="res://assets/Tombstone_dead.png" id="2_41lv8"]
 [ext_resource type="Texture2D" uid="uid://cxpiwrgbh5xrg" path="res://assets/Tombstone.png" id="2_aq3op"]
+[ext_resource type="Texture2D" uid="uid://bsbvelmpf6p31" path="res://assets/Tombstone_destroyed_boon.png" id="2_yhkkt"]
+[ext_resource type="Texture2D" uid="uid://brwkhksqx70od" path="res://assets/Tombstone_destroyed.png" id="4_cbte0"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_b3xbm"]
 animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_yhkkt")
+}],
+"loop": true,
+"name": &"boon",
+"speed": 5.0
+}, {
 "frames": [{
 "duration": 1.0,
 "texture": ExtResource("2_41lv8")
 }],
 "loop": true,
 "name": &"dead",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("4_cbte0")
+}],
+"loop": true,
+"name": &"destroyed",
 "speed": 5.0
 }, {
 "frames": [{
@@ -36,7 +54,7 @@ script = ExtResource("1_2d53x")
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(-8, -8)
 sprite_frames = SubResource("SpriteFrames_b3xbm")
-animation = &"dead"
+animation = &"boon"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 show_behind_parent = true
