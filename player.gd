@@ -195,7 +195,8 @@ func _process(delta):
 
 # TODO: manage rate of fire
 func fire_bullet(dir: Vector2):
-	current_weapon_cooldown = weapon_cooldown_time
+	#TODO: need to make this not quite linear	
+	current_weapon_cooldown = weapon_cooldown_time*num_bullets_per_shot
 	
 	#TODO: need to fire with the collision (center + (0,32)) at your feet
 	# with a reduced MUZZLE_OFFSET*dir and then use layers so the bullet's visibility
@@ -218,17 +219,18 @@ func fire_bullet(dir: Vector2):
 	if num_bullets_per_shot >= 2:
 		for i in range(min(num_bullets_per_shot, 3) - 1):
 			var extra_bullet = bullet_scene.instantiate()
-			var dir_offset = PI*0.05
+			var dir_offset = PI*0.02
 			# Swivels from side to side
 			if (num_bullets_per_shot == 2 and randf() <= 0.5) or i == 1:
 				dir_offset = - dir_offset				
 			extra_bullet.start(bullet_position, direction + dir_offset, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
 			get_tree().root.add_child(extra_bullet)
 			
-	#TODO: this only works if direction is left/right, or 2PI works up/down but not the other
-	if num_bullets_per_shot == 4:
+	if num_bullets_per_shot == 4 and dir.length() > 0:
 		var extra_bullet = bullet_scene.instantiate()
-		extra_bullet.start(bullet_position, PI - direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+		var reverse_dir = dir.rotated(PI)
+		var extra_bullet_position = position + muzzle_offset*reverse_dir
+		extra_bullet.start(extra_bullet_position, reverse_dir.angle(), bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
 		get_tree().root.add_child(extra_bullet)
 
 func teleport():

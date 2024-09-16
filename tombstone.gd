@@ -99,7 +99,8 @@ func _on_collide_with_bullet(bullet: Bullet):
 				#boon_info = all_boons["More_Bullets"]#pick_boon()
 				$AnimatedSprite2D.play("boon_%s" % boon_info["category"])
 				$CollisionShape2D.scale = Vector2(2, 1.2) #(x and y are reversed for some reason)
-				$CollisionShape2D.position.y = $CollisionShape2D.position.y - 5
+				# TODO: I don't think I need this any more
+				#$CollisionShape2D.position.y = $CollisionShape2D.position.y - 5
 				# After this, bullets will go through boons
 				self.set_collision_layer_value(2, false)
 				self.set_collision_layer_value(4, true)
