@@ -169,7 +169,7 @@ const all_boons = {
 		"description": "Go faster",
 		"weight": 15, # Rare-ish
 		"category": "movement",
-		"amount": 20,
+		"amount": 50,
 	},
 	"Zombie_Bounces": {
 		"key": "Zombie_Bounces",
@@ -185,13 +185,14 @@ const all_boons = {
 		"category": "environment",
 		"amount": 1,
 	},
-	"More_Boons": {
-		"key": "More_Boons",
-		"description": "More boons!",
-		"weight": 20,
-		"category": "environment",
-		"amount": 0.05,
-	}
+	#TODO: what to do with boons (concurrent)?
+	#"More_Boons": {
+	#	"key": "More_Boons",
+	#	"description": "More boons!",
+	#	"weight": 20,
+	#	"category": "environment",
+	#	"amount": 0.05,
+	#}
 }	
 
 func pick_boon() -> Dictionary:

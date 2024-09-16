@@ -18,7 +18,7 @@ var time_since_last_spawn = 0.0
 var game_round = 0
 var game_area: Vector2
 var MAX_CHANCE_OF_BOON = 0.7
-var INIT_CHANCE_OF_BOON = 0.4
+var INIT_CHANCE_OF_BOON = 1.0
 var chance_of_boon = INIT_CHANCE_OF_BOON
 
 func build_random_entity_position():

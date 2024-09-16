@@ -81,6 +81,7 @@ func start_game(game_area: Vector2):
 	mob_bounce = 0
 	tombstone_bounce = 1
 	mob_pierce = 0
+	num_bullets_per_shot = 1
 
 # Handles collisions
 func _physics_process(delta):
