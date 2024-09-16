@@ -96,7 +96,6 @@ func _on_collide_with_bullet(bullet: Bullet):
 				add_to_group("boons")
 				#TODO
 				boon_info = pick_boon()
-				#boon_info = all_boons["More_Bullets"]#pick_boon()
 				$AnimatedSprite2D.play("boon_%s" % boon_info["category"])
 				$CollisionShape2D.scale = Vector2(2, 1.2) #(x and y are reversed for some reason)
 				# TODO: I don't think I need this any more
@@ -124,7 +123,7 @@ const all_boons = {
 		# common keys:
 		"key": "Health", #(include this twice so we can have eg "MinHealth", .. "MaxHealth" top level keys 
 		"description": "Healing!", #(this goes in Last Boon text)
-		"weight": 30, # 30 is Common
+		"weight": 50, # 30 is Common
 		"category": "health", #health, movement, weapon, environment
 		# Boon specific
 		"amount": 10,
@@ -133,7 +132,7 @@ const all_boons = {
 		# common keys:
 		"key": "Max_Health", 
 		"description": "Higher max health", 
-		"weight": 15, # rare
+		"weight": 20, # rare
 		"category": "health",
 		# Boon specific
 		"amount": 5,
@@ -171,10 +170,17 @@ const all_boons = {
 		"category": "movement",
 		"amount": 50,
 	},
+	"More_Dashing":  {
+		"key":  "More_Dashing",
+		"description": "More dashes",
+		"weight": 15, # Rare-ish
+		"category": "movement",
+		"amount": 0.2,
+	},
 	"Zombie_Bounces": {
 		"key": "Zombie_Bounces",
 		"description": "Increased bounces off of zombies",
-		"weight": 10, #prety rare
+		"weight": 15, #prety rare
 		"category": "environment",
 		"amount": 1,
 	},

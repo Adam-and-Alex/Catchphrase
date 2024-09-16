@@ -17,8 +17,9 @@ var time_elapsed = 0.0
 var time_since_last_spawn = 0.0
 var game_round = 0
 var game_area: Vector2
-var MAX_CHANCE_OF_BOON = 0.7
-var INIT_CHANCE_OF_BOON = 1.0
+const START_ROUND_FOR_BOON_DECAY = 15
+const INIT_CHANCE_OF_BOON = 1.0
+const BOON_DECAY_RATE = 0.95 #(applies after the first 15 rounds)
 var chance_of_boon = INIT_CHANCE_OF_BOON
 
 func build_random_entity_position():
@@ -82,6 +83,10 @@ func _process(delta):
 			time_elapsed += delta
 			time_since_last_spawn += delta
 			$PlayerHealth.text = "%d" % $Player.player_hp
+			
+			#TODO: some sort of exit criteria:
+			# more than 120s, health goes up (>100) for 5 consecutive rounds
+			
 		var dash_ability_str = "Dash Cooldown"			
 		if $Player.dash_ability:
 			dash_ability_str = "RT: Dash!"
@@ -103,6 +108,8 @@ func _process(delta):
 	if game_started:
 		$TimeElapsed.text = "%.1fs" % time_elapsed
 		if time_since_last_spawn > SPAWN_FREQ_S and not $Player.is_dead:
+			if game_round > START_ROUND_FOR_BOON_DECAY:
+				chance_of_boon = chance_of_boon*BOON_DECAY_RATE
 			game_round = game_round + 1
 			time_since_last_spawn = 0.0
 			for i in range(game_round):
@@ -155,6 +162,11 @@ func receive_boon(boon_info: Dictionary):
 		if not $Player.boon_more_speed(boon_info.amount):
 			fallback_boon()
 	
+	elif boon_info.key == "More_Dashing":
+		recognized_boon = true
+		if not $Player.boon_more_dashing(boon_info.amount):
+			fallback_boon()
+	
 	elif boon_info.key == "Zombie_Bounces":
 		recognized_boon = true
 		if not $Player.boon_zombie_bounces(boon_info.amount):
@@ -181,8 +193,5 @@ func receive_boon(boon_info: Dictionary):
 			add_child(tombstone_instance)
 
 func boon_increase_boons(amount: float) -> bool:
-	if chance_of_boon < MAX_CHANCE_OF_BOON:
-		chance_of_boon += amount
-		return true
-	else:
-		return false
+	#TODO: increase the number of boons that persist after you collect one
+	return false

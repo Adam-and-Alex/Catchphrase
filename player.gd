@@ -12,6 +12,8 @@ const DASH_SPEED = 1200
 var speed = NORMAL_SPEED
 var dash_ability = true
 var is_dashing = false
+var MIN_DASH_COOLDOWN = 0.4
+var dash_cooldown = 1.0
 
 # Weapon state
 const MUZZLE_OFFSET = 32
@@ -82,6 +84,8 @@ func start_game(game_area: Vector2):
 	tombstone_bounce = 1
 	mob_pierce = 0
 	num_bullets_per_shot = 1
+	dash_cooldown = 1
+	$DashCooldown.set_wait_time(dash_cooldown)
 
 # Handles collisions
 func _physics_process(delta):
@@ -197,7 +201,7 @@ func _process(delta):
 # TODO: manage rate of fire
 func fire_bullet(dir: Vector2):
 	#TODO: need to make this not quite linear	
-	current_weapon_cooldown = weapon_cooldown_time*num_bullets_per_shot
+	current_weapon_cooldown = weapon_cooldown_time*sqrt(num_bullets_per_shot)
 	
 	#TODO: need to fire with the collision (center + (0,32)) at your feet
 	# with a reduced MUZZLE_OFFSET*dir and then use layers so the bullet's visibility
@@ -287,7 +291,7 @@ func boon_another_teleport() -> bool:
 		return false 
 		
 func boon_faster_weapon(amount: float) -> bool:		
-	if weapon_cooldown_time > MIN_WEAPON_COOLDOWN:
+	if weapon_cooldown_time > MIN_WEAPON_COOLDOWN/sqrt(num_bullets_per_shot):
 		weapon_cooldown_time = weapon_cooldown_time - amount
 		return true
 	else:
@@ -321,4 +325,12 @@ func boon_more_speed(amount: int) -> bool:
 	else:
 		return false
 	
+func boon_more_dashing(amount: float) -> bool:
+	if dash_cooldown > MIN_DASH_COOLDOWN:
+		dash_cooldown -= amount
+		$DashCooldown.set_wait_time(dash_cooldown)
+		return true
+	else:
+		return false
 	
+

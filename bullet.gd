@@ -58,6 +58,8 @@ func pierce(b: Bullet):
 	start(b.position, b.direction, b.bullet_scale, mob_pierce - 1, mob_bounce - 1, tombstone_bounce - 1)
 
 func _physics_process(delta):
+	$AnimatedSprite2D.z_index = min(max(position.y, 0), 1000)
+
 	var collision_info = move_and_collide(velocity*delta)
 	if collision_info:
 		var collider = collision_info.get_collider()
