@@ -44,7 +44,7 @@ func _ready():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta):
-	$AnimatedSprite2D.z_index = position.y
+	$AnimatedSprite2D.z_index = max(position.y, 0)
 	
 	if zombie_damage_visibility > 0:
 		zombie_damage_visibility = maxf(zombie_damage_visibility - 0.01, 0)

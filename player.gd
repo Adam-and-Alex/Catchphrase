@@ -214,20 +214,22 @@ func fire_bullet(dir: Vector2):
 	b.start(bullet_position, direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
 	get_tree().root.add_child(b)
 
-	#TODO: WIP this doesn't yet do anything
-
 	# 2nd and 3rd shots, either side
-	if num_bullets_per_shot == 2 or num_bullets_per_shot == 3:
-		for ii in range(num_bullets_per_shot - 1):
-			var bb = bullet_scene.instantiate()
-			var dir_offset = PI*0.1
-			#TODO: make this swivel from side to side
-			bb.start(bullet_position, direction + dir_offset, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+	if num_bullets_per_shot >= 2:
+		for i in range(min(num_bullets_per_shot, 3) - 1):
+			var extra_bullet = bullet_scene.instantiate()
+			var dir_offset = PI*0.05
+			# Swivels from side to side
+			if (num_bullets_per_shot == 2 and randf() <= 0.5) or i == 1:
+				dir_offset = - dir_offset				
+			extra_bullet.start(bullet_position, direction + dir_offset, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+			get_tree().root.add_child(extra_bullet)
 			
+	#TODO: this only works if direction is left/right, or 2PI works up/down but not the other
 	if num_bullets_per_shot == 4:
-		var bb = bullet_scene.instantiate()
-		bb.start(bullet_position, 2*PI - direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
-		get_tree().root.add_child(bb)
+		var extra_bullet = bullet_scene.instantiate()
+		extra_bullet.start(bullet_position, PI - direction, bullet_scale, mob_pierce, mob_bounce, tombstone_bounce)		
+		get_tree().root.add_child(extra_bullet)
 
 func teleport():
 	num_teleports = num_teleports - 1

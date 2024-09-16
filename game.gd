@@ -18,11 +18,14 @@ var time_since_last_spawn = 0.0
 var game_round = 0
 var game_area: Vector2
 var MAX_CHANCE_OF_BOON = 0.7
-var chance_of_boon = 0.35
+var INIT_CHANCE_OF_BOON = 0.4
+var chance_of_boon = INIT_CHANCE_OF_BOON
 
 func build_random_entity_position():
 	var rng = RandomNumberGenerator.new()
+	@warning_ignore("narrowing_conversion")
 	var rndX = rng.randi_range(25, game_area.x - 25)
+	@warning_ignore("narrowing_conversion")
 	var rndY = rng.randi_range(25, game_area.y - 25)	
 	var starting_position = Vector2(rndX, rndY)
 	return starting_position	
@@ -56,7 +59,7 @@ func start_game():
 	time_since_last_spawn = 0.0
 	game_round = 0	
 	game_started = true
-	chance_of_boon = 0.25
+	chance_of_boon = INIT_CHANCE_OF_BOON
 	
 	$Player.position = build_random_entity_position()
 	$Player.start_game(game_area)

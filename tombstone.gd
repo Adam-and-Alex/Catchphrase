@@ -51,10 +51,10 @@ func _ready():
 		$AnimatedSprite2D.play("dead")
 		
 	
-func _physics_process(delta):
+func _physics_process(_delta):
 	pass
 
-func _process(delta):
+func _process(_delta):
 	$AnimatedSprite2D.z_index = position.y
 
 func _on_collide_with_player():
@@ -94,7 +94,9 @@ func _on_collide_with_bullet(bullet: Bullet):
 			if random_chance < game.chance_of_boon:
 				has_boon = true
 				add_to_group("boons")
+				#TODO
 				boon_info = pick_boon()
+				#boon_info = all_boons["More_Bullets"]#pick_boon()
 				$AnimatedSprite2D.play("boon_%s" % boon_info["category"])
 				$CollisionShape2D.scale = Vector2(2, 1.2) #(x and y are reversed for some reason)
 				$CollisionShape2D.position.y = $CollisionShape2D.position.y - 5
@@ -152,7 +154,7 @@ const all_boons = {
 	"More_Bullets":  {
 		"key":  "More_Bullets",
 		"description": "More bullets per shot",
-		"weight": 20, # Rarer
+		"weight": 10, # rare
 		"category": "weapon"
 	},
 	"Teleport":  {
