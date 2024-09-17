@@ -51,6 +51,7 @@ func _ready():
 	$TimeElapsed.z_index = 1000
 	$Instructions.z_index = 1000
 	$CanPlayerDash.z_index = 1000
+	$LastBoon.z_index = 1000
 	
 func start_game():	
 	$Instructions.hide()
@@ -82,8 +83,11 @@ func _process(delta):
 		if game_started:
 			time_elapsed += delta
 			time_since_last_spawn += delta
-			$PlayerHealth.text = "%d" % $Player.player_hp
-			
+			if $Player.player_hp == $Player.max_player_hp:
+				$PlayerHealth.text = "%d" % $Player.player_hp
+			else:
+				$PlayerHealth.text = "%d / %d" % [ $Player.player_hp, $Player.max_player_hp ]
+				
 			#TODO: some sort of exit criteria:
 			# more than 120s, health goes up (>100) for 5 consecutive rounds
 			
@@ -192,6 +196,6 @@ func receive_boon(boon_info: Dictionary):
 			child.queue_free()
 			add_child(tombstone_instance)
 
-func boon_increase_boons(amount: float) -> bool:
+func boon_increase_boons(_amount: float) -> bool:
 	#TODO: increase the number of boons that persist after you collect one
 	return false

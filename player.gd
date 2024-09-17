@@ -264,7 +264,7 @@ func _on_collide_with_zombie(zombie_damage):
 
 func boon_increase_health(health_bonus: int):
 	if player_hp < max_player_hp:
-		player_hp += health_bonus
+		player_hp = min(player_hp + health_bonus, max_player_hp)
 		return true
 	else:
 		return false

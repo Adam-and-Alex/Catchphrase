@@ -10,7 +10,7 @@ var BULLET_SPEED = 1400
 var BULLET_KNOCKBACK = 150
 
 # Bullet damage
-var default_bullet_damage = 10
+var default_bullet_damage: float = 10
 
 # Bullet size
 var bullet_scale = 1
@@ -25,7 +25,7 @@ var mob_pierce = 0.0
 #TODO: all sorts of fun params here and in player
 # fire rate, max in flight, bounce %, split chars, knockback, (set on fire), makes scatter
 
-func start(_position: Vector2, _direction: float, _scale: float, _pierce, _mob_bounce, _tombstone_bounce):
+func start(_position: Vector2, _direction: float, _scale: float, _pierce: int, _mob_bounce: int, _tombstone_bounce: int):
 	rotation = _direction
 	position = _position
 	velocity = Vector2(BULLET_SPEED, 0).rotated(rotation)
@@ -42,23 +42,25 @@ func start(_position: Vector2, _direction: float, _scale: float, _pierce, _mob_b
 	mob_bounce = _mob_bounce
 	tombstone_bounce = _tombstone_bounce
 	mob_pierce = _pierce
+	# Just show bullets over the top:
+	$AnimatedSprite2D.z_index = 999
 	
 
 func make_bounce(orig: Bullet, direction_offset: float, is_tombstone_bounce: bool = false):
 	var angle = orig.rotation
 	if is_tombstone_bounce:
 		angle = 2.0*PI - angle
-	start(orig.position, angle + direction_offset, orig.bullet_scale, orig.mob_pierce - 1, orig.mob_bounce - 1, orig.tombstone_bounce - 1)
+	start(orig.position, angle + direction_offset, orig.bullet_scale, orig.mob_pierce - 1, orig.mob_bounce/2, orig.tombstone_bounce/2)
 	# This is just a hack to stop a bullet colliding with its first tombstone a gazillion times
 	ignore_tombstones = is_tombstone_bounce
+	default_bullet_damage = orig.default_bullet_damage/2
 	
 
 func pierce(b: Bullet):
 	# TODO needs to "teleport to other side of mob"
-	start(b.position, b.direction, b.bullet_scale, mob_pierce - 1, mob_bounce - 1, tombstone_bounce - 1)
+	start(b.position, b.direction, b.bullet_scale, mob_pierce - 1, mob_bounce/2, tombstone_bounce/2)
 
 func _physics_process(delta):
-	$AnimatedSprite2D.z_index = min(max(position.y, 0), 1000)
 
 	var collision_info = move_and_collide(velocity*delta)
 	if collision_info:
