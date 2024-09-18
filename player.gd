@@ -6,10 +6,11 @@ const Zombie = preload("res://zombie.gd")
 const Tombstone = preload("res://tombstone.gd")
 
 # Player movement state:
-const NORMAL_SPEED = 400
 const MAX_NORMAL_SPEED = 600
+var INIT_NORMAL_SPEED = 400
+var normal_speed = INIT_NORMAL_SPEED
 const DASH_SPEED = 1200
-var speed = NORMAL_SPEED
+var speed = normal_speed
 var dash_ability = true
 var is_dashing = false
 var MIN_DASH_COOLDOWN = 0.4
@@ -48,12 +49,9 @@ var teleport_ability = false #(use dash cooldown)
 # Temp collision state
 var num_collisions = 0
 
-#TODO: lots of fun buffs: dash effects, speed, armor, touch effects, 
-#various healing (lifesteal, regen, medkits)
-
 # Dashing state logic
 func _on_dash_duration_timeout():
-	speed = NORMAL_SPEED
+	speed = normal_speed
 	is_dashing = false
 func _on_dash_cooldown_timeout():
 	dash_ability = true
@@ -72,6 +70,7 @@ func start_game(game_area: Vector2):
 	player_damage_visibility = 0
 	modulate = Color(1, 1, 1)
 	player_hp = MAX_HP
+	max_player_hp = MAX_HP
 	bullet_scale = 1
 	$AnimatedSprite2D.play("down_walk")	
 	dash_ability = true
@@ -86,6 +85,8 @@ func start_game(game_area: Vector2):
 	num_bullets_per_shot = 1
 	dash_cooldown = 1
 	$DashCooldown.set_wait_time(dash_cooldown)
+	speed = normal_speed
+	normal_speed = INIT_NORMAL_SPEED
 
 # Handles collisions
 func _physics_process(delta):
@@ -319,8 +320,10 @@ func boon_tombstone_bounces(amount: int) -> bool:
 		return false
 
 func boon_more_speed(amount: int) -> bool:
-	if speed < MAX_NORMAL_SPEED:
-		speed += amount
+	if normal_speed < MAX_NORMAL_SPEED:
+		normal_speed += amount
+		if not is_dashing:
+			speed = normal_speed
 		return true
 	else:
 		return false

@@ -120,12 +120,12 @@ func _on_collide_with_dashing_player(velo: Vector2):
 func _on_collide_with_other_character(velo: Vector2, damping: float):
 	is_scattering = true
 	scatter_speed = SCATTER_SPEED*damping
-	scatter_angle = velo.angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
+	# Experiment
+	scatter_angle = self.velocity.bounce(velo).angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
 	$ScatterTimer.start()
 
 # Shot with a bullet!
-func _on_collide_with_bullet(bullet: Bullet):
-	
+func _on_collide_with_bullet(bullet: Bullet):	
 	var bullet_velocity = bullet.velocity
 	var knockback_strength = bullet.BULLET_KNOCKBACK
 	var bullet_damage = bullet.default_bullet_damage

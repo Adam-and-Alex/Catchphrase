@@ -4,7 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://bs8dssxcr4771" path="res://player.tscn" id="2_jk0uq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_nemq3"]
-size = Vector2(67.0605, 1024)
+size = Vector2(67.0605, 1027)
 
 [node name="Game" type="Node2D"]
 y_sort_enabled = true
@@ -36,8 +36,8 @@ position = Vector2(-116, 99)
 collision_layer = 8
 collision_mask = 15
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
-position = Vector2(82, 230)
+[node name="Left_CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+position = Vector2(1173, 221)
 shape = SubResource("RectangleShape2D_nemq3")
 
 [node name="RightWall" type="StaticBody2D" parent="."]
@@ -45,8 +45,8 @@ position = Vector2(-116, 99)
 collision_layer = 8
 collision_mask = 15
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
-position = Vector2(1173, 221)
+[node name="Right_CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+position = Vector2(80, 206)
 shape = SubResource("RectangleShape2D_nemq3")
 
 [node name="TopWall" type="StaticBody2D" parent="."]
@@ -55,7 +55,7 @@ rotation = -0.00889796
 collision_layer = 8
 collision_mask = 15
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
+[node name="Top_CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
 position = Vector2(629.163, -126.875)
 rotation = -1.56157
 shape = SubResource("RectangleShape2D_nemq3")
@@ -66,8 +66,8 @@ rotation = -0.00889796
 collision_layer = 8
 collision_mask = 15
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
-position = Vector2(621.859, 580.556)
+[node name="Bottom_CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
+position = Vector2(620.36, 580.542)
 rotation = -1.56157
 shape = SubResource("RectangleShape2D_nemq3")
 

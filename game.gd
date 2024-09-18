@@ -16,13 +16,14 @@ var game_started = false
 var time_elapsed = 0.0
 var time_since_last_spawn = 0.0
 var game_round = 0
-var game_area: Vector2
+var game_area: Vector2 = Vector2(980, 600)
 const START_ROUND_FOR_BOON_DECAY = 10
 const INIT_CHANCE_OF_BOON = 1.0
 const BOON_DECAY_RATE = 0.95 #(applies after the first 10 rounds)
 var chance_of_boon = INIT_CHANCE_OF_BOON
 const MAX_RETAINED_BOONS = 4
 var retained_boons: int = 0
+
 
 func build_random_entity_position():
 	var rng = RandomNumberGenerator.new()
@@ -48,6 +49,8 @@ func add_zombie():
 
 func _ready():
 	game_area = get_viewport().get_visible_rect().size
+	#TODO to be able to do this need to figure out how to configure the boundary
+	#get_window().size = game_area
 	$PlayerHealth.z_index = 1000
 	$CanPlayerDash.z_index = 1000
 	$TimeElapsed.z_index = 1000
