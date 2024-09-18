@@ -17,10 +17,12 @@ var time_elapsed = 0.0
 var time_since_last_spawn = 0.0
 var game_round = 0
 var game_area: Vector2
-const START_ROUND_FOR_BOON_DECAY = 15
+const START_ROUND_FOR_BOON_DECAY = 10
 const INIT_CHANCE_OF_BOON = 1.0
-const BOON_DECAY_RATE = 0.95 #(applies after the first 15 rounds)
+const BOON_DECAY_RATE = 0.95 #(applies after the first 10 rounds)
 var chance_of_boon = INIT_CHANCE_OF_BOON
+const MAX_RETAINED_BOONS = 4
+var retained_boons: int = 0
 
 func build_random_entity_position():
 	var rng = RandomNumberGenerator.new()
@@ -62,6 +64,7 @@ func start_game():
 	game_round = 0	
 	game_started = true
 	chance_of_boon = INIT_CHANCE_OF_BOON
+	retained_boons = 0
 	
 	$Player.position = build_random_entity_position()
 	$Player.start_game(game_area)
@@ -183,19 +186,23 @@ func receive_boon(boon_info: Dictionary):
 
 	elif boon_info.key == "More_Boons":
 		recognized_boon = true
-		if not boon_increase_boons(boon_info.amount):
+		if not boon_increase_boons():
 			fallback_boon()
 	
 	if not recognized_boon:
 		print_debug("UNRECOGNIZED BOON %s" % boon_info.key)
 	else:
 		var children_to_delete = get_tree().get_nodes_in_group("boons")
-		for child in children_to_delete:
+		for i in range(retained_boons, children_to_delete.size()):
+			var child = children_to_delete[i]
 			var tombstone_instance = tombstone_scene.instantiate()
 			tombstone_instance.destroy(child)
 			child.queue_free()
 			add_child(tombstone_instance)
 
-func boon_increase_boons(_amount: float) -> bool:
-	#TODO: increase the number of boons that persist after you collect one
-	return false
+func boon_increase_boons() -> bool:
+	if retained_boons < MAX_RETAINED_BOONS:
+		retained_boons += 1
+		return true
+	else:
+		return false

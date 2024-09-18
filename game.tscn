@@ -76,8 +76,10 @@ offset_left = 264.0
 offset_top = 263.0
 offset_right = 792.0
 offset_bottom = 387.0
+theme_override_colors/default_color = Color(0, 0, 0, 1)
 text = "Press Enter To Start
 Survive as long as you can
+Dash through danger...
 Shoot the tombstones of the fallen!"
 
 [node name="LastBoon" type="RichTextLabel" parent="."]

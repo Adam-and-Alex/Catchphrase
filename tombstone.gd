@@ -140,7 +140,7 @@ const all_boons = {
 	"Bigger_Bullets":  {
 		"key":  "Bigger_Bullets",
 		"description": "Increased bullet size",
-		"weight": 30, # Common
+		"weight": 20, # Common
 		"category": "weapon",
 		"amount": 0.2,
 	},
@@ -191,14 +191,12 @@ const all_boons = {
 		"category": "environment",
 		"amount": 1,
 	},
-	#TODO: what to do with boons (concurrent)?
-	#"More_Boons": {
-	#	"key": "More_Boons",
-	#	"description": "More boons!",
-	#	"weight": 20,
-	#	"category": "environment",
-	#	"amount": 0.05,
-	#}
+	"More_Boons": {
+		"key": "More_Boons",
+		"description": "More boons!",
+		"weight": 10, #rare
+		"category": "environment",
+	}
 }	
 
 func pick_boon() -> Dictionary:
