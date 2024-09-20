@@ -121,7 +121,7 @@ func _on_collide_with_other_character(velo: Vector2, damping: float):
 	is_scattering = true
 	scatter_speed = SCATTER_SPEED*damping
 	# Experiment
-	scatter_angle = self.velocity.bounce(velo).angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
+	scatter_angle = self.velocity.bounce(velo.normalized()).angle() + randf_range(-MAX_SCATTER_ANGLE, MAX_SCATTER_ANGLE)
 	$ScatterTimer.start()
 
 # Shot with a bullet!
